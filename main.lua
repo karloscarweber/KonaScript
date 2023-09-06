@@ -1,5 +1,4 @@
 -- main.lua
-
 require('scanner')
 require('token')
 
@@ -11,4 +10,4 @@ repeat
   load(input)
 until input == "exit"
 
--- I'ts possible to write a REPL if you
+-- It's possible to write a REPL if you just do something wiht the input, and scann it, and lex it, then load the code, then execute the code. I think.
