@@ -2,6 +2,17 @@
 
 An attempt to write a small programming language or DSL in LUA to make UI and code stuff for websites that's really great.
 
+## Names?:
+	* Stim
+	* Canned  .org - available
+	* Can
+	* Stimpack
+	* Pound
+	* Kona
+	* Case
+	* Kiki
+	* Jiji
+
 ## Why?
 Javascript is not the best. It's getting better, but ya know what... we could do better. I want a language that supports an expressive syntax to construct and manipulate Nested UI. One that is purpose built for the needs of the web and it's interface, and one that responds to and makes UI responsive and interactive.
 
@@ -38,7 +49,7 @@ Modular: Have a simple environment and module system.
 Micro: A small surface area with a few sharp and powerful tools. Able to quickly build UI Interactions, and cool stuff with only a few attribtues, but be small enough to never think twice about embedding it. Small surface area also means that it's easy to parse, and it's difficult to confuse with HTML and CSS.
 
 Eventable, Ability to attach lifecycle callbacks to any object or element, along with triggered events from arbitrary events:
-```stim
+```ruby
 class Element
   # ... element code
 
@@ -49,7 +60,7 @@ end
 ```
 
 Event listeners using `when` are functions that register themselves with the broadcast/listening subsystem thingy. I suppose we would also need to keep track of broadcasting or bubbling events too. So maybe this:
-```stim
+```ruby
 class Element
   # ... element code
   def somethingCool
@@ -78,25 +89,31 @@ Simple Syntax: Although we want the language to be expressive, we also don't wan
 Builtin Testing Framework: Make it easy to test this mother fucker.
 
 Duck Typing, but builtin Type annotations for runtime type checking. A pretty good system for building Runtime Type Checkers into the thing. So that Functions can have parameter markers and Return markers for all the basic types, and collection types too.
-```stim
+```ruby
 # Optional TypeAnnotations
-def funky fresh:->String, bacon:->String
+def funky(fresh: String, bacon: String) -> nil
   puts fresh + bacon
-end ->String
+end
 
 # What about Collections?
-->Collection[->String] or ->Collection[->Object]
+Collection[String] or ->Collection[->Object]
+Collection[Int]
 
 # You can declare you're own types/protocols using a protocol syntax:
-String->
-  def << ->String end ->String
-  def + ->String end ->String
-  def pop end ->String
+Protocol String
+  def << (String) ->String
+  def + (String) ->String
+  def pop ->String
 end
+
+# The protocol Syntax registers a global String Protocol attached to the String Class
+# but you can store a reference to this protocol
+string_Protocol = String.protocol
+
 ```
 
 Check types at runtime: Using protocols we should add some builtin Object functions:
-```stim
+```ruby
 myObject.conformsTo(String)
 
 # or make it only in function calls with types you get a special method:
@@ -118,3 +135,88 @@ end
 ```
 
 PROTOCOLS: Like in Swift, are named, an Object will have parameters, and expected input types
+
+
+Data objects versus behaviour: Pure Data objects should be a possibilty at least. Something that just represents data and can be passed around, but that holds a lot inside of it. Maybe Classes are really Collections with associated data on lookup?
+
+# Galaxy brain idea
+So I was thinking, what if everything is an object? Right I already thought of that, but what if Blocks, Arrays, Collections, Builders, and Class Bodys are all pretty much the same type of object. A Builder object. What if everything is a builder object and once it builds you can iterate, query, redefine, stuff inside.
+
+Let's look at an array:
+```stim
+
+	# Make an array
+	list = {"literally", "just", "strings"}
+	list.count
+	# > 3
+
+	list.each do |k, v| puts v end
+	# > literally
+	# > just
+	# > strings
+
+	list.each do |k, v| puts k end
+	# > 0
+	# > 1
+	# > 2
+```
+
+The defining characeristics are that the values are sequential and the keys are integers. Ok, cool, but we can make a Hash or a Dictionary that does the same thing:
+```stim
+	# Make a Dictionary/Hash
+	list = { 0:"literally", 1:"just", 2:"strings"}
+	list.count
+	# > 3
+
+	list[0]
+	# > literally
+```
+
+What if the construction for either of these are basically the same?
+```ruby
+	# Make a monster
+	monster = {
+		0: "thing",
+		1: "another thign",
+		name: "Demigorgon"
+	}
+	monster.name
+	# > Demigorgon
+
+	monster.count
+	# > 3
+
+	monster[0]
+	# > thing
+
+	monster[2]
+	# > Demigorgon
+```
+
+Not bad, We can have arrays that have methods or properties. But what if we want an array that has those things, but that aren't counted among the values of the array? Maybe we can do a special construction for that:
+```lua
+	function Array(members)
+		local array = {}
+		array.__members = {}
+		array.count = function() __members.count end
+		array.each = function(block)
+			local transformation = {}
+			for k,v in __members do
+				transformation = if_true((block(k,v)) -- adds to transformation if it's true.
+			end
+			return transformation
+		end
+		return array
+	end
+
+	-- make an Array
+	names = {"Jim", "Kim", "Tim"}
+	names.each(function (k,v) do
+		puts k
+	end)
+	-- > Jim
+	-- > Kim
+	-- > Tim
+```
+
+A generic cunstructor function could figure out whats a member value, and what's a function. Even for dictionaries. I mean it would be pretty cool to make a class, then query the class with `each`. or to redefine the each function for an array, but just for that ONE array that you've got, simply by setting a key during it's construction.
