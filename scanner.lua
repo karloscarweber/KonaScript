@@ -56,6 +56,12 @@ function Scanner:scanTokens ()
   return self.tokens
 end
 
+function Scanner:spitTokens ()
+	for _, v in ipairs(self.tokens) do
+		print(v.toString)
+	end
+end
+
 Scanner.scanTokenFunctions = {
   ["("] = function (s) s:addToken(LEFT_PAREN) end,
   [")"] = function (s) s:addToken(RIGHT_PAREN) end,
@@ -215,5 +221,5 @@ function Scanner:addToken(type, literal)
   self.tokens[(#self.tokens + 1)] = Token(type, text, "", self.line)
 end
 
-scan = Scanner:new("this should be good {}()")
-scan:scanTokens()
+-- scan = Scanner:new("this should be good {}()")
+-- scan:scanTokens()
