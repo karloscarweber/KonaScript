@@ -9,7 +9,7 @@ function Token (type, lexeme, literal, line)
   t.lexeme = lexeme
   t.literal = literal
   t.line = line
-  t.toString = type .. "  " .. lexeme .. " " .. literal
+  t.toString = "[" .. type .. "]  " .. lexeme .. " " .. literal
   t.description = "(line:" .. line .. ") - " .. type .. "  " .. lexeme .. " " .. literal
   return t
 end
