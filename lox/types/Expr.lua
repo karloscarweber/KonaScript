@@ -1,56 +1,31 @@
--- lox
-
---import nothing
+-- lox/types/Expr.lua
 
 Expr = {
-		function Binary ()
-			function Expr left, Token operator, Expr right ()
-				this.Expr = Expr
-				this.left = left
-				this.Token = Token
-				this.operator = operator
-				this.Expr = Expr
-				this.right = right
-			end
+	["Binary"] = function (left,operator,right)
+		local t = {}
+		t.left = left
+		t.operator = operator
+		t.right = right
+		return t
+	end,
 
-		final Expr;
-		final left;
-		final Token;
-		final operator;
-		final Expr;
-		final right;
-	end
-		function Grouping ()
-			function Expr expression ()
-				this.Expr = Expr
-				this.expression = expression
-			end
+	["Grouping"] = function (expression)
+		local t = {}
+		t.expression = expression
+		return t
+	end,
 
-		final Expr;
-		final expression;
-	end
-		function Literal ()
-			function Object value ()
-				this.Object = Object
-				this.value = value
-			end
+	["Literal"] = function (value)
+		local t = {}
+		t.value = value
+		return t
+	end,
 
-		final Object;
-		final value;
-	end
-		function Unary ()
-			function Token operator, Expr right ()
-				this.Token = Token
-				this.operator = operator
-				this.Expr = Expr
-				this.right = right
-			end
+	["Unary"] = function (operator,right)
+		local t = {}
+		t.operator = operator
+		t.right = right
+		return t
+	end,
 
-		final Token;
-		final operator;
-		final Expr;
-		final right;
-	end
-end
-
-
+}

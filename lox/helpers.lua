@@ -1,4 +1,5 @@
-
+-- lox/helpers.lua
+--
 -- get's the table length of a table
 function tablelength(the_table)
   local count = 0
@@ -26,4 +27,13 @@ function trim(str)
 	st = string.gsub(str, "^%s+", "")
 	st = string.gsub(st, "%s+$", "")
 	return st
+end
+
+function StringBuilder()
+	local t = {
+		buffer = "",
+		append = function(str) self.buffer = self.buffer .. str end,
+		toString = function() return self.buffer end
+	}
+	return t
 end

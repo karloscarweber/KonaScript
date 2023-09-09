@@ -84,6 +84,8 @@ ALL_TOKENS = {
 ["EOF"] = EOF,
 }
 
+TokenType = ALL_TOKENS
+
 AT = ALL_TOKENS
 -- tt = token_types
 -- all_tokens = {}
