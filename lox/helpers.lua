@@ -13,6 +13,7 @@ function split(inputstr, sep)
 		sep = "%s"
 	end
 	local t = {}
+	-- (%w+)%s*=%s*(%w+)
 	for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
 		table.insert(t, str)
 	end

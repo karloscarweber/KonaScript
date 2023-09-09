@@ -15,56 +15,53 @@ function defineAst(directory, baseName, types)
 	local path = directory .. "/" .. baseName .. ".lua"
 	local file = io.open(path, "w")
 
-	file:write("-- lox\n")
-	file:write("\n")
-	file:write("--import nothing\n")
+	file:write("-- lox/types/Expr.lua\n")
 	file:write("\n")
 	file:write(baseName .. " = {\n")
 
 		for _, type in ipairs(types) do
-			local className = (split(type, ":"))[1]
-			className = trim(className)
+			local className = trim((split(type, ":"))[1])
 			local fields = (split(type, ":"))[2]
 			fields = trim(fields)
 			defineType(file, baseName, className, fields)
 		end
 
-	file:write("end\n")
-	file:write("\n\r")
+	file:write("}")
+	file:write("\n")
 	file:close()
 
 end
 
 function defineType(file, baseName, className, fieldList)
-	file:write("		function " .. className .. " ()\n")
+	file:write("	[\"" .. className .. "\"]" .. " = function ")
 
 	-- Constructor
-	file:write("			function " .. fieldList .. " ()\n")
 	local fields = split(fieldList, ", ")
-	for _, field in ipairs(fields) do
-		local name = split(field, " ")[1]
-		file:write("				this." .. name .. " = " .. name .. "\n")
+
+	local buffer = "("
+
+	for key, value in string.gmatch(fieldList, "(%w+)%s*(%w+)") do
+		print("key: " .. key .. ", value: " .. value)
+		buffer = buffer .. value .. ","
 	end
+	buffer = buffer .. "nilme)\n"
+	buffer = string.gsub(buffer, ",nilme", "")
 
-	file:write("			end\n")
+	buffer = buffer .. "		" .. "local t = {}\n"
+	for key, value in string.gmatch(fieldList, "(%w+)%s*(%w+)") do
+		buffer = buffer .. "		t." .. value .. " = " .. value .. "\n"
+	end
+	buffer = buffer .. "		return t\n"
 
+	file:write(buffer)
+
+	file:write("	end,\n")
 	-- Fields
 	file:write("\n")
-	for _, field in ipairs(fields) do
-		file:write("		final " .. field .. ";\n")
-	end
-
-	file:write("}\n")
-
 end
 
 function GenerateAst(directory)
-	-- if not (tablelength(arg) == 1) then
-	-- 	print("some errors")
-	-- end
-
 	local outputDir = directory
-
 	local list = {
 		"Binary   : Expr left, Token operator, Expr right",
 		"Grouping : Expr expression",
