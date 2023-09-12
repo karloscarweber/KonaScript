@@ -19,6 +19,8 @@ function defineAst(directory, baseName, types)
 	file:write("\n")
 	file:write(baseName .. " = {\n")
 
+		-- defineVisitor(file, baseName, types)
+
 		for _, type in ipairs(types) do
 			local className = trim((split(type, ":"))[1])
 			local fields = (split(type, ":"))[2]
@@ -26,38 +28,62 @@ function defineAst(directory, baseName, types)
 			defineType(file, baseName, className, fields)
 		end
 
+		-- file:write("\n")
+		-- file:write("	abstract <R> R accept(Visitor<R> visitor);")
+
 	file:write("}")
 	file:write("\n")
 	file:close()
 
 end
 
+-- Defines a type.
 function defineType(file, baseName, className, fieldList)
 	file:write("	[\"" .. className .. "\"]" .. " = function ")
 
 	-- Constructor
-	local fields = split(fieldList, ", ")
-
+	-- local fields = split(fieldList, ", ")
 	local buffer = "("
 
+	-- Store parameters in fields.
 	for key, value in string.gmatch(fieldList, "(%w+)%s*(%w+)") do
-		print("key: " .. key .. ", value: " .. value)
+		-- print("key: " .. key .. ", value: " .. value)
 		buffer = buffer .. value .. ","
 	end
 	buffer = buffer .. "nilme)\n"
 	buffer = string.gsub(buffer, ",nilme", "")
 
+	-- Build prototype
 	buffer = buffer .. "		" .. "local t = {}\n"
+	buffer = buffer .. "		" .. "t.name = " .. "\"" .. className .. "\"\n"
+	-- Fields to their keys
 	for key, value in string.gmatch(fieldList, "(%w+)%s*(%w+)") do
 		buffer = buffer .. "		t." .. value .. " = " .. value .. "\n"
 	end
-	buffer = buffer .. "		return t\n"
 
+	-- accept visitor pattern stuff.
+	buffer = buffer .. "		t.accept = function(visitor)\n"
+	buffer = buffer .. "			return visitor.visit" .. className .. baseName .. "(t)\n"
+	buffer = buffer .. "		end\n"
+
+	-- Close out the prototype definition.
+	buffer = buffer .. "		return t\n"
 	file:write(buffer)
 
+	-- Close the type
 	file:write("	end,\n")
-	-- Fields
 	file:write("\n")
+end
+
+function defineVisitor(writer, baseName, types)
+	writer:write("	interface Visitor<R> {")
+
+	for _, type in ipairs(types) do
+		local typeName = trim(split(type, ":")[1])
+		writer:write("		R visit" .. typeName .. baseName .. "(" .. typeName .. " " .. string.lower(baseName) .. ")\n")
+	end
+
+	writer:write("	}")
 end
 
 function GenerateAst(directory)

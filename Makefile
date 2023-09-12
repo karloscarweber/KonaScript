@@ -3,3 +3,6 @@ default:
 
 generate:
 	lua lox/generateast_tool.lua
+
+printer:
+	lua lox/AstPrinter.lua

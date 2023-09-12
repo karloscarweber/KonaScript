@@ -3,15 +3,17 @@
 An attempt to write a small programming language or DSL in LUA to make UI and code stuff for websites that's really great.
 
 ## Names?:
+	* Kona (kona-lang.org)
+	* Capsule
+	* Cartridge
 	* Stim
 	* Canned  .org - available
 	* Can
 	* Stimpack
-	* Pound
-	* Kona
 	* Case
 	* Kiki
 	* Jiji
+	* Pound
 
 ## Why?
 Javascript is not the best. It's getting better, but ya know what... we could do better. I want a language that supports an expressive syntax to construct and manipulate Nested UI. One that is purpose built for the needs of the web and it's interface, and one that responds to and makes UI responsive and interactive.
@@ -39,6 +41,48 @@ element.children
 ```
 
 DOM ready, an expressive API for querying, modifying, and monitoring the DOM.
+
+templateable: Expressive syntax for creating, composing, and rendering xml based template systems, like Svg and Html.
+```stim
+	class NameTag < Element
+
+		# You can write html directly into a Kona file. The template is stored as a special
+		# Template type. Which is a concatenated string. The template is assigned to the name of
+		# the custom tag that you declare, in the case of this template, it's nameTag
+		<nameTag name="jimbo" data-controller="another attribute">
+			<p>My Name</p>
+		</nameTag>
+
+	end
+```
+
+The template syntax above is syntactic sugar for:
+```lua
+	ButtonList = Class.inheritFrom(Element)
+	ButtonList.template = Template("nameTag", [[<nameTag name="jimbo" data-controller="another attribute">
+		<p>My Name</p>
+	</nameTag>]], {["name"] = "jimbo", ["data-controller"] = "another attribute"})
+```
+
+The `Template` class is important in this instance. By convention, the name of the template tag matches the containing object's name. But this doesn't have to be the case. giving the template an explicit assignment to local variable is also possible.
+```stim
+	template_name = <nameTag name="jimbo" data-controller="another attribute">
+			<p>My Name</p>
+	</nameTag>
+```
+
+Objects can also be constructed almost instantly from valid JSON. Although always sanitize your inputs:
+```json
+	person = {
+		"name" = "Jim Kirk",
+		"address" = {
+			"street" = "55 Rosa Parks Dr",
+			"street2" = "", "city" = "Victory City",
+			"state" = "California", "zip" = "90210",
+		},
+		"phone" = "555-992-5050"
+	}
+```
 
 Builtin Facilities for sanitization of common input and for the validation of that input.
 
@@ -220,3 +264,23 @@ Not bad, We can have arrays that have methods or properties. But what if we want
 ```
 
 A generic cunstructor function could figure out whats a member value, and what's a function. Even for dictionaries. I mean it would be pretty cool to make a class, then query the class with `each`. or to redefine the each function for an array, but just for that ONE array that you've got, simply by setting a key during it's construction.
+
+
+## Another Galaxy brain idea
+What if we take a feather out of Ruby's hat, but go one step further. What if, within the body of a builder, we can redefine the syntax for postfix and prefix operators, and what happens with them. I'm thinking `name = "Jim"` being redefined  to `name=("Jim")`, which is something that Ruby does, and the `name=` function is dynamically set. Ruby translates the syntax when it's add. What if we could do a little more than redefine getters and setters, but redefine prefix and postfix actions too?
+
+```lua
+	Tools = {
+		-- redefine the assignment operator.
+		["___postfix_function_="] = function(symbol, first, second) do
+			-- make a function to assign the new variable.
+			self[first.."="] = function(v)
+				self.___values[second] = v
+			end
+			-- make a new function to access the new variable.
+			self[first] = function()
+				self.___values[first]
+			end
+		end
+	}
+```

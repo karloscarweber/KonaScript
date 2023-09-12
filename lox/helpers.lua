@@ -29,11 +29,11 @@ function trim(str)
 	return st
 end
 
+-- A totally unnecessary object that let's us append strings in a nice little interface.
 function StringBuilder()
-	local t = {
-		buffer = "",
-		append = function(str) self.buffer = self.buffer .. str end,
-		toString = function() return self.buffer end
-	}
+	local t = {}
+		t.buffer = ""
+		t.append = function(str) t.buffer = t.buffer .. str end
+		t.toString = function() return t.buffer end
 	return t
 end
