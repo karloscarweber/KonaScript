@@ -88,13 +88,18 @@ end
 
 function GenerateAst(directory)
 	local outputDir = directory
-	local list = {
+	defineAst(outputDir, "Expr", {
 		"Binary   : Expr left, Token operator, Expr right",
 		"Grouping : Expr expression",
 		"Literal  : Object value",
 		"Unary    : Token operator, Expr right",
-	}
-	defineAst(outputDir, "Expr", list)
+	})
+
+	defineAst(outputDir, "Stmt", {
+		"Expression : Expr expression",
+		"Print      : Expr expression"
+	})
+
 end
 
 GenerateAst("./lox/types")

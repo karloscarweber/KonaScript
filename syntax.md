@@ -88,3 +88,86 @@ function_hash = {def funky(name) print name end,}
 function_hash.0 "dude"
 > "dude"
 ```
+
+
+
+
+# An Attempt at Extended BNF description
+
+{A} means 0 or more As, [A] means an opional A.
+
+
+block   ::=   {stat} [retstat]
+
+stat    ::=   `;` |
+              varlist `=` explist |
+              functioncall |
+              label |
+              break |
+              goto Name |
+              do block end |
+              while exp do block end |
+              repeat block until exp |
+              if exp then block {elseif exp then block} [else block] end |
+              for Name `=` exp `,` [`,` exp] do block end |
+              for namelist in explist do block end |
+              function funcname funcbody | |
+              local function Name funcbody |
+              local namelist [`=` explist]
+
+retstat ::=   return [explist] [`;`]
+
+label   ::=   `::` Name `::`
+
+funcname ::=  Name {`.` Name} [`:` Name]
+
+varlist  ::=  var {`,` var}
+
+var      ::= Name | prefixexp `[` exp `]` | prefixexp `.` Name
+
+namelist ::= Name {`,` Name}
+
+explist ::= exp {`,` exp}
+
+exp ::= nil | false | true | Numeral | LiteralString |
+            `...` | functiondef | prefixexp |
+            tabelconstructor | exp binop exp | unop exp
+
+prefixexp ::= var | functioncall | `(` exp `)`
+
+functioncall ::= prefixexp args | refixexp `:` Name args
+
+args ::= `(` [explist] `)` | tableconstructor | LiteralString
+
+functiondef ::= function funcbody
+
+funcbody ::= `(` [parlist] `)` block end
+
+parlist ::= namelist [`,` `...`] | `...`
+
+tableconstructor ::= `{` [fieldlist] `}`
+
+fieldlist ::= field {fieldsep field} [fieldsep]
+
+field ::= `[` exp `]` `=` exp | Name `=` exp | exp
+
+fieldsep ::= `,` | `;`
+
+binop ::= `+` | `-` | `*` | `/` | `//` | `^` | `%` | `&` |
+          `~` | `|` | `>>` | `<<` | `..` | `<` | `<=` |
+          `>` | `>=` | `==` | `~=` | and | or
+
+unop ::= `-` | not | `#` | `~`
+
+
+block means a block of code
+stat means statement.
+varlist means variable list
+explist means a list of expressions
+exp means expression
+Name means and identifier or name
+funcname means a function name
+funcbody means a function body
+retstat means return statement
+label means ??????
+unop means unary operator

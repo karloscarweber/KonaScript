@@ -1,6 +1,10 @@
 -- lox/helpers.lua
 --
 -- get's the table length of a table
+--
+
+require('lox/token_type')
+
 function tablelength(the_table)
   local count = 0
   for _ in pairs(the_table) do count = count + 1 end
@@ -36,4 +40,16 @@ function StringBuilder()
 		t.append = function(str) t.buffer = t.buffer .. str end
 		t.toString = function() return t.buffer end
 	return t
+end
+
+-- add a has value function to table
+-- returns true if the
+function table.has_value (tab, val)
+    for _, value in ipairs(tab) do
+        if value == val then
+            return true
+        end
+    end
+
+    return false
 end

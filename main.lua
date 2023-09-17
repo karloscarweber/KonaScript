@@ -1,5 +1,5 @@
 -- main.lua
-require('scanner')
+require('lox/scanner')
 
 local input
 local scan

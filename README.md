@@ -5,15 +5,7 @@ An attempt to write a small programming language or DSL in LUA to make UI and co
 ## Names?:
 	* Kona (kona-lang.org)
 	* Capsule
-	* Cartridge
 	* Stim
-	* Canned  .org - available
-	* Can
-	* Stimpack
-	* Case
-	* Kiki
-	* Jiji
-	* Pound
 
 ## Why?
 Javascript is not the best. It's getting better, but ya know what... we could do better. I want a language that supports an expressive syntax to construct and manipulate Nested UI. One that is purpose built for the needs of the web and it's interface, and one that responds to and makes UI responsive and interactive.
@@ -25,7 +17,7 @@ Composablitiy is also a goal. Templating that works and looks like it belongs in
 Animation: Expressive syntax to manipulate values over time, to broadcast the change of those values, and to provide in language facilities to ease from one value to another.
 
 Buildable, Objects broadcast their initililization to their containing block and are can natively recieve and bubble up event changes. Facilities for building view hiearchies that are pretty great, If I do say so myself. This requires a system to keep track of parent/child relationships. Probably reserving some variables to track these element would make sense.
-```stim
+```ruby
 class Element
   def initialize(name)
     @name = name
@@ -43,7 +35,7 @@ element.children
 DOM ready, an expressive API for querying, modifying, and monitoring the DOM.
 
 templateable: Expressive syntax for creating, composing, and rendering xml based template systems, like Svg and Html.
-```stim
+```ruby
 	class NameTag < Element
 
 		# You can write html directly into a Kona file. The template is stored as a special
@@ -125,8 +117,73 @@ class Element
 end
 ```
 
+Bindable: An extension of events, and similar to how publishers and observers work in SwiftUI, we should have a system to Instantiate objects that observer the change of values in other objects and receive updates on these changes. This should also be something that builders tap in to so that they can re-run subsystems that rely on the built state of certain objects.
 
-MetaProgrammatic: First class facilities for Meta programming, Although the design should strive for a simplified metaprogamming paradigm. Write code that writes code, but not actually too much code.
+```lua
+-- set up a cabinet storage spot
+cabinet = {cheese="Gouda"}
+
+-- make a plate, but pass a binding variable to it.
+local cheese_binding = $cabinet.cheese
+plate = Plate:new(cheese_binding)
+```
+
+I'm not sure how this one will work exactly though. It will need to be a fundamental thing in the language to allow redefining a variable and propagating that value downward in an efficient and easy way.
+
+Maybe the `$` symbol is a proxy operator that makes a proxy object for a value, and that proxy object is what's passed downward. `$` could also check to see if the object passed to it is already a proxy, and if it is, then it doesn't re-proxy it. Maybe like this:
+
+```lua
+
+local all_proxies = {}
+
+Proxy = function(value)
+	t = {}
+	t.___value = value
+
+	setmetatable(t, {
+		___value = value,
+		__index = {
+			return self.___value
+		},
+		__new_index = function(key, value)
+			self.___value = value
+		end,
+	})
+
+	all_proxies.add(value)
+end
+
+-- calls to `$value`, are transformed to this:
+-- make_or_get_proxy(value)
+function make_or_get_proxy(value_or_object)
+	if type(value_or_object == proxy)
+		return value_or_object
+	else
+		value_or_object = Proxy(value_or_object)
+	end
+end
+
+-- set up a cabinet storage spot
+cabinet = {cheese="Gouda"}
+
+-- make a plate, but pass a binding variable to it.
+local cheese_binding = make_or_get_proxy(cabinet.cheese)
+plate = Plate:new(cheese_binding)
+```
+
+oh crap, this won't work. When you're tryin got index a value: `container.value_youre_indexing`, you're looking for that key in the object. In order to properly proxy and propagate a value's changes, you'll need to add a proxy to the containing object: `container` in this case. and that proxy will then grab the value for a value table, or pass along changes. Quite a bit of state will need to be set up in that instance.
+
+So for this to work every object will need to have a metatable with `__index` and `__new_index` set up to look up the values that are just values, and return the proxies value for those that are not values. this is because we want to prevent direct assignments or reassignments of the proxied value, which could erase the proxy. I think we'll solve that by rewriting the assignment operator for objects to be something like this:
+```lua
+object = NewObject{cheese="Gouda"}
+
+-- instead of object.cheese = "Cheddar"
+object["cheese="]("Cheddar")
+```
+That means we index the `cheese=` function in object and pass it the value instead of directly setting the value. getters and setters are default proxies that we make for objects. Perhaps that does a lot of the work that we need for a proxy.
+
+
+MetaProgrammatic: First class facilities for Meta programming, Although the design should strive for a simplified meta programming paradigm. Write code that writes code, but not actually too much code.
 
 Simple Syntax: Although we want the language to be expressive, we also don't want the language to have too many ways to do something. Keeping the language simple to parse with as few features as possible until we get what we want is paramount. More complicated features could be written in Stim itself, hopefully to get the Lua bytecode parser to bless us.
 
@@ -153,7 +210,6 @@ end
 # The protocol Syntax registers a global String Protocol attached to the String Class
 # but you can store a reference to this protocol
 string_Protocol = String.protocol
-
 ```
 
 Check types at runtime: Using protocols we should add some builtin Object functions:
@@ -167,14 +223,14 @@ def funky fresh:->String, bacon:->String|nil
 end
 ```
 
-Named Parameters: Functions on Objects/Collections should use Named Parameters.
-Symbol by Default Index: Symbolized or named keys on Collections by default, so you can do: a = {whatever="loser"} and you can access it's index with: a.whatever (ACTUALLY THIS IS BAD! What about methods on a collection object that match a named dictionary entry?) Maybe all objects should have internal storage for the basic types, and exposed methods will just use that internal storage. So that we can still do that dynamic object stuff.
+Named Parameters: Functions on Objects/Collections should, or can use Named Parameters.
+Symbol by Default Index: Symbolized or named keys on Collections by default, so you can do: a = {whatever="loser"} and you can access it's index with: a.whatever (ACTUALLY THIS IS BAD! What about methods on a collection object that match a named dictionary entry?) Maybe all objects should have internal storage for the basic types, and exposed methods will just use that internal storage. So that we can still do that dynamic object stuff. Not sure about this. Exposing more of Lua's semantics and power will make the language more flexible, but not exactly the idiomatic feeling that we're looking for.
 
 Pattern Matching: When using named parameters in function calls or in collection constructors, locally named variables will be used to fill in the giblets.
-```stim
+```ruby
 # Optional Type annotations.
 def funky(fresh:->String,bacon:->String)
-  puts
+	sandwhich = {fresh:, bacon:}
 end
 ```
 
@@ -187,7 +243,7 @@ Data objects versus behaviour: Pure Data objects should be a possibilty at least
 So I was thinking, what if everything is an object? Right I already thought of that, but what if Blocks, Arrays, Collections, Builders, and Class Bodys are all pretty much the same type of object. A Builder object. What if everything is a builder object and once it builds you can iterate, query, redefine, stuff inside.
 
 Let's look at an array:
-```stim
+```ruby
 
 	# Make an array
 	list = {"literally", "just", "strings"}
@@ -206,7 +262,7 @@ Let's look at an array:
 ```
 
 The defining characeristics are that the values are sequential and the keys are integers. Ok, cool, but we can make a Hash or a Dictionary that does the same thing:
-```stim
+```ruby
 	# Make a Dictionary/Hash
 	list = { 0:"literally", 1:"just", 2:"strings"}
 	list.count
@@ -263,11 +319,11 @@ Not bad, We can have arrays that have methods or properties. But what if we want
 	-- > Tim
 ```
 
-A generic cunstructor function could figure out whats a member value, and what's a function. Even for dictionaries. I mean it would be pretty cool to make a class, then query the class with `each`. or to redefine the each function for an array, but just for that ONE array that you've got, simply by setting a key during it's construction.
+A generic constructor function could figure out whats a member value, and what's a function. Even for dictionaries. I mean it would be pretty cool to make a class, then query the class with `each`. or to redefine the each function for an array, but just for that ONE array that you've got, simply by setting a key during it's construction.
 
 
 ## Another Galaxy brain idea
-What if we take a feather out of Ruby's hat, but go one step further. What if, within the body of a builder, we can redefine the syntax for postfix and prefix operators, and what happens with them. I'm thinking `name = "Jim"` being redefined  to `name=("Jim")`, which is something that Ruby does, and the `name=` function is dynamically set. Ruby translates the syntax when it's add. What if we could do a little more than redefine getters and setters, but redefine prefix and postfix actions too?
+What if we take a feather out of Ruby's hat, but go one step further. What if, within the body of a builder, we can redefine the syntax for postfix and prefix operators, and what happens with them. I'm thinking `name = "Jim"` being redefined  to `["name="]("Jim")`, which is something that Ruby does, and the `name=` function is dynamically set. Ruby translates the syntax when it's added. What if we could do a little more than redefine getters and setters, but redefine prefix and postfix actions too?
 
 ```lua
 	Tools = {
@@ -283,4 +339,27 @@ What if we take a feather out of Ruby's hat, but go one step further. What if, w
 			end
 		end
 	}
+
+	-- called internally from a table:
+	local ObjectTable = {}
+	function ObjectTable:new()
+		local t = { __index = {}}
+	end
+
+	setmetatable(ObjectTable,ObjectTable)
+	ObjectTable.__index = function()
+	end
+
+	-- function Parser:new(tokens)
+	-- 	t = {
+	-- 		current = 1,
+	-- 		tokens = tokens,
+	-- 		["ParserError"] = ParserError,
+	-- 	}
+	-- 	setmetatable(t,self)
+	-- 	self.__index = self
+	-- 	return t
+	-- end
+
+
 ```

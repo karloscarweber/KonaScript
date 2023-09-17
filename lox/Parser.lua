@@ -4,106 +4,162 @@
 
 require 'lox/token_type'
 require 'lox/Lox'
+require 'lox/helpers'
 
 -- Parser
+-- Namespace for the parser class
+Parser = {}
+
+-- Write a Parser error Class
+ParserError = function()
+	local t = {}
+	t.name = "Parser Error"
+	t.purpose = "report errors?"
+	return t
+end
+
 -- Generates a new parser object
 --
 -- 	@tokens - An array of tokens
 --  @current - an int representing the current token, starts at 1.
 --
 -- 	init(@tokens) - implicit contstructor, accepts a tokens parameter.
-Parser = function(tokens)
-	t = {}
-	t.tokens = {}
-	t.current = 1 -- 1 terminated because this is Lua.
-	t.tokens = tokens
+function Parser:new(tokens)
+	local t = {
+		current = 1,
+		tokens = tokens,
+		["ParserError"] = ParserError,
+	}
+	setmetatable(t,self)
+	self.__index = self
 	return t
 end
 
+-- parse
+-- Accepts nothing, but spits out an array of statements.
+--
+function Parser:parse()
+	-- pcall, returns true, and nothing if there is no error
+	-- otherwise it returns false, and an error.
+	-- local status, err = pcall(foo)
+	-- if status then
+	-- 	return
+	-- else
+	-- 	return nil
+	-- end
+	local statements = {}
+	while not self:isAtEnd() do
+		table.insert(statements, self:statement())
+	end
+	return statements
+end
+
+-- local someTokens = getTokens()
+-- local parser = Parser:new(tokens)
+
 -- functions that parse the syntax tree and return Raw Lua code
 
-PS_expression = function()
-	return PS_equality()
+function Parser:expression()
+	return self:equality()
 end
 
-PS_equality = function()
-	local expr = PS_comparison()
+function Parser:statement()
+	if self:match(PRINT) then return self:printStatement() end
+	return self:expressionStatement()
+end
 
-	while (PS_match(BANG_EQUAL, EQUAL_EQUAL)) do
-		local operator = PS_previous()
-		local right =  PS_comparison()
+function Parser:printStatement()
+	local value = self:expression()
+	self:consume(SEMICOLON, "expect ';' after value.")
+	return Stmt.Print(value)
+end
+
+function Parser:expressionStatement()
+	local expr = self:expression()
+	self:consume(SEMICOLON, "expect ';' after expression.")
+	return Stmt.Expression(value)
+end
+
+function Parser:equality()
+	local expr = self:comparison()
+
+	while (self:match(BANG_EQUAL, EQUAL_EQUAL)) do
+		local operator = self:previous()
+		local right = self:comparison()
 		expr = Expr.Binary(expr, operator, right)
 	end
 
 	return expr
 end
 
-PS_comparison = function()
-	local expr = PS_term()
+function Parser:comparison()
+	local expr = self:term()
 
-	while(PS_match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) do
-		local operator = PS_previous()
-		local right = PS_term()
+	while(self:match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) do
+		local operator = self:previous()
+		local right = self:term()
 		expr = Expr.Binary(expr, operator, right)
 	end
 
 	return expr
 end
 
-PS_term = function()
-	local expr = PS_factor()
+function Parser:term()
+	local expr = self:factor()
 
-	while(PS_match(MINUS, PLUS)) do
-		local operator = PS_previous()
-		local right = PS_factor()
+	while(self:match(MINUS, PLUS)) do
+		local operator = self:previous()
+		local right = self:factor()
 		expr = Expr.Binary(expr, operator, right)
 	end
 
 	return expr
 end
 
-PS_factor = function()
-	local expr = unary()
+function Parser:factor()
+	local expr = self:unary()
 
-	while(PS_match(SLASH, STAR)) do
-		local operator = PS_previous()
-		local right = unary()
+	while(self:match(SLASH, STAR)) do
+		local operator = self:previous()
+		local right = self:unary()
 		expr = Expr.Binary(expr, operator, right)
 	end
 
 	return expr
 end
 
-PS_unary = function()
-	if(PS_match(BANG, MINUS)) then
-		local operator = PS_previous()
-		local right = PS_unary()
+function Parser:unary()
+	if(self:match(BANG, MINUS)) then
+		local operator = self:previous()
+		local right = self:unary()
 		return Expr.Unary(operator, right)
 	end
-	return primary()
+	return self:primary()
 end
 
-PS_primary = function()
-	if (PS_match(FALSE)) then return Expr.Literal(false) end
-	if (PS_match(TRUE)) then return Expr.Literal(true) end
-	if (PS_match(NIL)) then return Expr.Literal(nil) end
+function Parser:primary()
+	if (self:match(FALSE)) then return Expr.Literal(false) end
+	if (self:match(TRUE)) then return Expr.Literal(true) end
+	if (self:match(NIL)) then return Expr.Literal(nil) end
 
-	if(PS_match(NUMBER, STRING)) then
-		return Expr.Literal(PS_previous().literal)
+	if(self:match(NUMBER, STRING)) then
+		return Expr.Literal(self:previous().literal)
 	end
 
-	if(PS_match(LEFT_PAREN)) then
-		local expr = PS_expression()
-		PS_consume(RIGHT_PAREN, "Expect ')' after expression.")
+	if(self:match(LEFT_PAREN)) then
+		local expr = self:expression()
+		self:consume(RIGHT_PAREN, "Expect ')' after expression.")
 		return Expr.Grouping(expr)
 	end
+
+	error("Expect expression. : " .. self:peek().lexeme)
 end
 
-PS_match = function(...)
+function Parser:match(...)
 	local types = {...}
 	for _,type in ipairs(types) do
-		if PS_check(type) then
-			PS_advance()
+		if self:check(type) then
+			self:advance()
 			return true
 		end
 	end
@@ -111,35 +167,48 @@ PS_match = function(...)
 	return false
 end
 
-PS_consume = function(type, message)
-	if check(type) then return advance() end
+function Parser:consume(type, message)
+	if self:check(type) then return self:advance() end
 
-	throw error(peek(), message)
+	self:error(self:peek(), message)
 end
 
-PS_check = function(type)
-	if PS_isAtEnd() then return false end
-	return (PS_peek().type == type)
+function Parser:check(type)
+	if self:isAtEnd() then return false end
+	return (self:peek().type == type)
 end
 
-PS_advance = function()
-	if (!PS_isAtEnd()) then current++ end
-	return PS_previous();
+function Parser:advance()
+	if not (self:isAtEnd()) then self.current = self.current + 1 end
+	return self:previous();
 end
 
-PS_isAtEnd = function()
-	return PS_peek().type == EOF
+function Parser:isAtEnd()
+	return self:peek().type == EOF
 end
 
-PS_peek = function()
-	return tokens.get(current)
+function Parser:peek()
+	return self.tokens[self.current]
 end
 
-PS_previous = function()
-	return tokens.get(current-1))
+function Parser:previous()
+	return self.tokens[self.current-1]
 end
 
-PS_error = function(token, message)
-	Lox.error(token, message)
-	return ParseError()
+function Parser:error(token, message)
+	Lox.token_error(token, message)
+	return ParserError()
+end
+
+-- synchronize
+local switchcase = {CLASS, FUN, VAR, FOR, IF, WHILE, PRINT, RETURN}
+function Parser:synchronize(token, message)
+	self:advance()
+	while not(self:isAtEnd()) do
+		if (self:previous().type == SEMICOLON) then return end
+		if table.has_value(switchcase, self:peek().type) then
+			return
+		end
+		self:advance()
+	end
 end
