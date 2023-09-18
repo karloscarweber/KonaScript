@@ -69,10 +69,13 @@ end
 function Lox.run(source)
 	local scanner = Scanner:new(source)
 	tokens = scanner:scanTokens()
+
+	for _, token in ipairs(tokens) do
+		io.write(token.toString .. "\n")
+	end
+
 	local parser = Parser:new(tokens)
-	print("3")
 	local statements = parser:parse()
-	print("4")
 
 	print("scanning tokens and such")
 
@@ -108,6 +111,3 @@ function Lox.token_error(token, message)
 		report(token.line, " at '" .. token.lexeme .. "'", message)
 	end
 end
-
--- Starts up the Lox interpreter to get things rolling.
-Lox:main()

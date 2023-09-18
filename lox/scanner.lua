@@ -159,7 +159,7 @@ function Scanner:number()
 end
 
 function Scanner:string()
-  while (self:peek() ~= '"' and not self:isAtEnd()) do
+  while (self:peek() ~= '"' or not(self:isAtEnd()) ) do
     if (self:peek() == '\n') then self.line = self.line + 1 end
     self:advance()
   end

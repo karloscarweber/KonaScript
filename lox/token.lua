@@ -10,7 +10,7 @@ function Token (type, lexeme, literal, line)
   t.literal = literal
   t.line = line
   if literal == nil then literal = 'nil' end
-  t.toString = "[" .. type .. "]  " .. lexeme .. " " .. literal
+  t.toString = "" .. type .. " => [" .. lexeme .. "] " .. literal
   t.description = "(line:" .. line .. ") - " .. type .. "  " .. lexeme .. " " .. literal
   return t
 end

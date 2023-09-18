@@ -3,6 +3,9 @@
 
 require('lox/Lox')
 
+-- Starts up the Lox interpreter to get things rolling.
+Lox:main()
+
 -- local input
 -- local scan
 -- repeat

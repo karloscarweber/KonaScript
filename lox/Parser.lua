@@ -63,24 +63,31 @@ function Parser:expression()
 end
 
 function Parser:declaration()
-	print("declaration ... " .. self:peek())
+	print("declaration ... " .. self:peek().lexeme)
 	local result = {}
-	if (pcall(
-	function()
-		if self:match(VAR) then
-			print("var Declaration")
-			return self:varDeclaration()
-		end
-		print("var statement:")
-		result = self:statement()
-		return false
-	end
-	)) == true then
-		self:synchronize()
-		return nil
+	if self:match(VAR) then
+		print("var Declaration")
+		return self:varDeclaration()
 	else
-		return result
+		print("Did not match a var for some reason.")
 	end
+	-- if (pcall(
+	-- function()
+	-- 	if self:match(VAR) then
+	-- 		print("var Declaration")
+	-- 		return self:varDeclaration()
+	-- 	end
+	-- 	print("var statement:")
+	-- 	result = self:statement()
+	-- 	return false
+	-- end
+	-- )) == true then
+	-- 	self:synchronize()
+	-- 	return nil
+	-- else
+	-- 	return result
+	-- end
+	print("reach end.")
 end
 
 function Parser:statement()
@@ -96,7 +103,7 @@ end
 
 function Parser:varDeclaration()
 	local name = self:consume(IDENTIFIER, "Expect variable name.")
-
+	print("consumed something")
 	local initializer = nil
 	if self:match(Equal) then
 		initializer = self:expression()
@@ -192,7 +199,7 @@ function Parser:primary()
 end
 
 function Parser:match(...)
-	puts "match: ..."
+	print "match: ..."
 	local types = {...}
 	for _,type in ipairs(types) do
 		if self:check(type) then
@@ -215,7 +222,7 @@ function Parser:check(type)
 end
 
 function Parser:advance()
-	puts "advancing"
+	print "advancing"
 	if not (self:isAtEnd()) then
 		print("Old Current:" .. self.current .. ", New current:" .. (self.current + 1) .. ".")
 		self.current = self.current + 1
