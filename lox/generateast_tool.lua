@@ -55,7 +55,7 @@ function defineType(file, baseName, className, fieldList)
 
 	-- Build prototype
 	buffer = buffer .. "		" .. "local t = {}\n"
-	buffer = buffer .. "		" .. "t.name = " .. "\"" .. className .. "\"\n"
+	buffer = buffer .. "		" .. "t.__typeName = " .. "\"" .. className .. "\"\n"
 	-- Fields to their keys
 	for key, value in string.gmatch(fieldList, "(%w+)%s*(%w+)") do
 		buffer = buffer .. "		t." .. value .. " = " .. value .. "\n"
@@ -93,11 +93,13 @@ function GenerateAst(directory)
 		"Grouping : Expr expression",
 		"Literal  : Object value",
 		"Unary    : Token operator, Expr right",
+		"Variable : Token name"
 	})
 
 	defineAst(outputDir, "Stmt", {
 		"Expression : Expr expression",
-		"Print      : Expr expression"
+		"Print      : Expr expression",
+		"Var        : Token name, Expr initializer"
 	})
 
 end

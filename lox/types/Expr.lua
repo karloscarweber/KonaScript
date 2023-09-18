@@ -3,7 +3,7 @@
 Expr = {
 	["Binary"] = function (left,operator,right)
 		local t = {}
-		t.name = "Binary"
+		t.__typeName = "Binary"
 		t.left = left
 		t.operator = operator
 		t.right = right
@@ -15,7 +15,7 @@ Expr = {
 
 	["Grouping"] = function (expression)
 		local t = {}
-		t.name = "Grouping"
+		t.__typeName = "Grouping"
 		t.expression = expression
 		t.accept = function(visitor)
 			return visitor.visitGroupingExpr(t)
@@ -25,7 +25,7 @@ Expr = {
 
 	["Literal"] = function (value)
 		local t = {}
-		t.name = "Literal"
+		t.__typeName = "Literal"
 		t.value = value
 		t.accept = function(visitor)
 			return visitor.visitLiteralExpr(t)
@@ -35,11 +35,21 @@ Expr = {
 
 	["Unary"] = function (operator,right)
 		local t = {}
-		t.name = "Unary"
+		t.__typeName = "Unary"
 		t.operator = operator
 		t.right = right
 		t.accept = function(visitor)
 			return visitor.visitUnaryExpr(t)
+		end
+		return t
+	end,
+
+	["Variable"] = function (name)
+		local t = {}
+		t.__typeName = "Variable"
+		t.name = name
+		t.accept = function(visitor)
+			return visitor.visitVariableExpr(t)
 		end
 		return t
 	end,

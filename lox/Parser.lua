@@ -3,7 +3,6 @@
 -- The parser for our Lua based Programming language
 
 require 'lox/token_type'
-require 'lox/Lox'
 require 'lox/helpers'
 
 -- Parser
@@ -49,7 +48,7 @@ function Parser:parse()
 	-- end
 	local statements = {}
 	while not self:isAtEnd() do
-		table.insert(statements, self:statement())
+		table.insert(statements, self:declaration())
 	end
 	return statements
 end
@@ -63,6 +62,27 @@ function Parser:expression()
 	return self:equality()
 end
 
+function Parser:declaration()
+	print("declaration ... " .. self:peek())
+	local result = {}
+	if (pcall(
+	function()
+		if self:match(VAR) then
+			print("var Declaration")
+			return self:varDeclaration()
+		end
+		print("var statement:")
+		result = self:statement()
+		return false
+	end
+	)) == true then
+		self:synchronize()
+		return nil
+	else
+		return result
+	end
+end
+
 function Parser:statement()
 	if self:match(PRINT) then return self:printStatement() end
 	return self:expressionStatement()
@@ -72,6 +92,18 @@ function Parser:printStatement()
 	local value = self:expression()
 	self:consume(SEMICOLON, "expect ';' after value.")
 	return Stmt.Print(value)
+end
+
+function Parser:varDeclaration()
+	local name = self:consume(IDENTIFIER, "Expect variable name.")
+
+	local initializer = nil
+	if self:match(Equal) then
+		initializer = self:expression()
+	end
+
+	self:consume(SEMICOLON, "Expect ';' after variable declaration.")
+	return Stmt.Var(name, initializer)
 end
 
 function Parser:expressionStatement()
@@ -146,6 +178,10 @@ function Parser:primary()
 		return Expr.Literal(self:previous().literal)
 	end
 
+	if(self:match(IDENTIFIER)) then
+		return Expr.Variable(self:previous())
+	end
+
 	if(self:match(LEFT_PAREN)) then
 		local expr = self:expression()
 		self:consume(RIGHT_PAREN, "Expect ')' after expression.")
@@ -156,6 +192,7 @@ function Parser:primary()
 end
 
 function Parser:match(...)
+	puts "match: ..."
 	local types = {...}
 	for _,type in ipairs(types) do
 		if self:check(type) then
@@ -169,7 +206,6 @@ end
 
 function Parser:consume(type, message)
 	if self:check(type) then return self:advance() end
-
 	self:error(self:peek(), message)
 end
 
@@ -179,7 +215,11 @@ function Parser:check(type)
 end
 
 function Parser:advance()
-	if not (self:isAtEnd()) then self.current = self.current + 1 end
+	puts "advancing"
+	if not (self:isAtEnd()) then
+		print("Old Current:" .. self.current .. ", New current:" .. (self.current + 1) .. ".")
+		self.current = self.current + 1
+	end
 	return self:previous();
 end
 

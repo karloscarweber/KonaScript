@@ -1,23 +1,28 @@
 -- lox/Interpreter.lua
+require 'lox/Environment'
 
 Interpreter = {}
 
 -- create a new parser by calling Interpreter:new()
 function Interpreter:new()
   local t = {
+    environment = LoxEnvironment()
   }
   setmetatable(t,self)
   self.__index = self
   return t
 end
 
-function Interpreter:inty(expression)
+function Interpreter:inty(statements)
+  for stmt in statements do
+    self:execute(stmt)
+  end
   local value = self:evaluate(expressions)
   print(tostring(value))
 end
 
-function Interpreter:interpret(expression)
-  if (pcall(self:inty(expression))) == true then
+function Interpreter:interpret(statements)
+  if (pcall(self:inty(statements))) == true then
     print("This broke")
   end
 end
@@ -35,6 +40,31 @@ function Interpreter:evaluate(expr)
   return expr.accept(self)
 end
 
+function execute(stmt)
+  stmt.accept(self)
+end
+
+function Interpreter:visitExpressionStmt(stmt)
+  self:evaluate(stmt.expression)
+  return nil
+end
+
+function Interpreter:visitPrintStmt(stmt)
+  local value = self:evaluate(stmt.expression)
+  print(tostring(value))
+  return nil
+end
+
+function Interpreter:visitVarStmt(stmt)
+  local value = nil
+  if not (stmt.initializer == nil) then
+    value = self:evaluate(stmt.initializer)
+  end
+
+  self.environment.define(stmt.name.lexeme, value)
+  return nil
+end
+
 local ut = {MINUS, BANG} -- unary Table
 function Interpreter:visitUnaryExpr(expr)
   local right = evaluate(expr.right)
@@ -50,13 +80,21 @@ function Interpreter:visitUnaryExpr(expr)
   return nil
 end
 
+function Interpreter:visitVariableExpr(expr)
+  return self.environment.get(expr.name)
+end
+
+function Interpreter:visitVariableExpr(expr)
+  return self.environment:get(expr.name)
+end
+
 function Interpreter:checkNumberOperand(operator, operand)
   if type(operand) == number then return end
   error("Operand must be a number. " .. operator.toString())
 end
 
 function Interpreter:checkNumberOperands(operator, left, right)
-  if (type(left) == "number") && (type(right) == "number") then return end
+  if (type(left) == "number") and (type(right) == "number") then return end
   error("Operands must be numbers: " .. operator.toString())
 end
 
@@ -73,7 +111,7 @@ function Interpreter:isEqual(a,b)
 end
 
 function Interpreter:stringify(object)
-  if object == nil return "nil" end
+  if object == nil then return "nil" end
 
   if type(object) == "number" then
     local text = object.toString()
@@ -95,13 +133,13 @@ function Interpreter:visitBinaryExpr(expr)
   if typ == GREATER then
     self:checkNumberOperands(expr.operator, left, right)
     return tonumber(left) > tonumber(right)
-  if typ == GREATER_EQUAL then
+  elseif typ == GREATER_EQUAL then
     self:checkNumberOperands(expr.operator, left, right)
     return tonumber(left) >= tonumber(right)
-  if typ == LESS then
+  elseif typ == LESS then
     self:checkNumberOperands(expr.operator, left, right)
     return tonumber(left) < tonumber(right)
-  if typ == LESS_EQUAL then
+  elseif typ == LESS_EQUAL then
     self:checkNumberOperands(expr.operator, left, right)
     return tonumber(left) <= tonumber(right)
   elseif typ == MINUS then

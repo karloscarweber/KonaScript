@@ -5,6 +5,7 @@
 require 'lox/interpreter'
 require 'lox/scanner'
 require 'lox/file_utility'
+require 'lox/Parser'
 
 Lox = {
 	hadError=false,
@@ -49,17 +50,19 @@ end
 
 -- Runs a comand prompt that loops and accepts program input.
 function Lox:runPrompt()
-	io.write("start Lox Prompt:\n\n") -- io.write, writes that thing
+	io.write("start Lox Prompt:\n") -- io.write, writes that thing
 	io.flush()
 	repeat
 	  io.write("> ") -- io.write, writes that thing to the buffer
 	  io.flush() -- flushes the buffer
 	  input=io.read() -- reads the input, or recieves it on enter.
-		if input ~= "exit" then
-			load(input)
+		print("reading the buffer")
+		if not (input == "exit") then
+			-- load(input)
 			Lox.run(input)
 			Lox.hadError = false
 		end
+		print("after input?")
 	until input == "exit" or Lox.exit == true
 end
 
@@ -67,11 +70,15 @@ function Lox.run(source)
 	local scanner = Scanner:new(source)
 	tokens = scanner:scanTokens()
 	local parser = Parser:new(tokens)
-	local expression = parser:parse()
+	print("3")
+	local statements = parser:parse()
+	print("4")
+
+	print("scanning tokens and such")
 
 	if Lox.hadError then return end
 
-	lox.interpreter.interpret(expression)
+	lox.interpreter:interpret(statements)
 
 	-- print(AstPrinter().print(expression))
 

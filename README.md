@@ -78,11 +78,11 @@ Objects can also be constructed almost instantly from valid JSON. Although alway
 
 Builtin Facilities for sanitization of common input and for the validation of that input.
 
-Object Oriented and Functional. Everything is an object, but functions are also first class objects. A simplified inheritance chain. Able to modify an existing object through inheritance, mixins, includes, and extends. Or maybe just a couple of those.
+Object Oriented and Functional. Everything is an object, but functions are also first class objects. A simplified inheritance chain. Able to modify an existing object through inheritance, mixins, includes, and extends. Or maybe just a couple of those. First class functions are kinda interesting, when mixed with Object oriented programming. In Ruby, for example, everything is an object and you send messages to objects to get them to do stuff. If functions are first class objects then they can be stored. what's the default message that you send to a function? What are the default messages for objects?
 
 Modular: Have a simple environment and module system.
 
-Micro: A small surface area with a few sharp and powerful tools. Able to quickly build UI Interactions, and cool stuff with only a few attribtues, but be small enough to never think twice about embedding it. Small surface area also means that it's easy to parse, and it's difficult to confuse with HTML and CSS.
+Micro: A small surface area with a few sharp and powerful tools. Able to quickly build UI Interactions, and cool stuff with only a few attributes, but be small enough to never think twice about embedding it. Small surface area also means that it's easy to parse, and it's difficult to confuse with HTML and CSS.
 
 Eventable, Ability to attach lifecycle callbacks to any object or element, along with triggered events from arbitrary events:
 ```ruby
