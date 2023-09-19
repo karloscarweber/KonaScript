@@ -4,6 +4,8 @@
 Dir = {}
 
 -- Scans a directory and returns a table of directory listings.
+-- @directory [String] a directory to search
+-- @suffix [String] an optional suffix to the files you want to grab.
 Dir.scandir = function(directory, suffix)
   local i, t, popen = 0, {}, io.popen
   local pfile = popen('ls -a "'..directory..'"')
@@ -31,17 +33,4 @@ Dir.scandir = function(directory, suffix)
   end
 
   return t
-end
-
--- checks to see if a string ends with another string
--- doesn't coerce the string.
-string.endswith = function(str, suffix)
-  if suffix ~= nil then
-    if string.sub(str, -(#suffix)) == suffix then
-      return true
-    end
-  end
-  -- suffix is nil so everything is false
-  -- or, substring check didn't return true
-  return false
 end

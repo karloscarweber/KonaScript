@@ -1,5 +1,6 @@
 -- lox/test.lua
 require 'lox/helpers/dir'
+require 'dots'
 
 -- test file for all of lox lua
 
