@@ -15,6 +15,15 @@ string.endswith = function(str, suffix)
   return false
 end
 
+string.beginswith = function(str, prefix)
+  if prefix ~= nil then
+    if string.sub(str, 1, #prefix) == prefix then
+      return true
+    end
+  end
+  return false
+end
+
 -- splits a string
 string.split = function(inputstr, sep)
   if sep == nil then
@@ -52,11 +61,48 @@ string._testdata.test_file = [[
   end)
 ]]
 
--- local splitted = string.split(string._testdata.test_file, "add")
--- print(splitted)
+-- string extensions to check if a string is AlphaNumeric
+string.isAlpha = function(c)
+  return (c >= 'a' and c <= 'z') or
+         (c >= 'A' and c <= 'Z') or
+          c == '_';
+end
+
+string.isDigit = function(c)
+  return c >= '0' and c <= '9'
+end
+
+string.isAlphaNumeric = function(c)
+  return string.isAlpha(c) or string.isDigit(c)
+end
+
+string.each = function(str, func)
+  for i=1, #str do
+  local c = str:sub(i,i)
+    func(c)
+  end
+end
+
+-- check for a valid filename
+string.isValidFilename = function(c)
+  local valid = true
+  string.each(c, function(cc)
+    if not( (cc >= 'a' and cc <= 'z') or (cc >= 'A' and cc <= 'Z') or cc == '_' or cc == '.' ) then
+      valid = false
+    end
+  end)
+  return valid
+end
 
 -- get_delimter
-
+-- an iterator that returns a multiline string, line by line
+-- Usage
+-- ```lua
+--   local lines = {}
+--   for line in magiclines(str) do
+--     lines[#lines + 1] = line
+--   end
+-- ```
 function magiclines(s)
   if s:sub(-1)~="\n" then s=s.."\n" end
   return s:gmatch("(.-)\n")
@@ -82,19 +128,15 @@ which_line = function(str,index)
   end
 
   while i < index do
-    -- print("length?")
-    -- print(tostring(#lines[line]))
     line = line + 1
     i = i + #lines[line];
-    -- print("now i:")
-    -- print(tostring(i))
   end
 
   return line
 end
 
-d = get_delimiter_indices(string._testdata.test_file, "task:add")
-wl = which_line(string._testdata.test_file, d[1])
-print(tostring(wl))
+-- d = get_delimiter_indices(string._testdata.test_file, "task:add")
+-- wl = which_line(string._testdata.test_file, d[1])
+-- print(tostring(wl))
 -- print(tostring(d))
 -- s = string._testdata.test_file

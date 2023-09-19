@@ -77,14 +77,14 @@ Dots.Task.new = function(filelist)
 end
 
 -- Adds a new test in a test file to the Task bundle thing.
-Dots.Task.add = function(summary, funk) {
+Dots.Task.add = function(summary, funk)
   local  new_test = {
     summary = summary,
     funk = funk
   }
   self.tests[#self.tests + 1] = new_test
   return self
-}
+end
 
 Dots._utilities = {
 
@@ -142,4 +142,4 @@ Dots.Task.after = {}
 -- output.
 Dots.Task.complete = {}
 
-Dots.Task.
+-- Dots.Task.

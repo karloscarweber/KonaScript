@@ -1,12 +1,13 @@
 -- lox/helpers/dir
+require 'lox/helpers/string'
 
 -- Directory helper library stuff
 Dir = {}
 
 -- Scans a directory and returns a table of directory listings.
 -- @directory [String] a directory to search
--- @suffix [String] an optional suffix to the files you want to grab.
-Dir.scandir = function(directory, suffix)
+-- @prefix [String] an optional prefix to the files you want to grab.
+Dir.scandir = function(directory, prefix)
   local i, t, popen = 0, {}, io.popen
   local pfile = popen('ls -a "'..directory..'"')
   for filename in pfile:lines() do
@@ -15,22 +16,25 @@ Dir.scandir = function(directory, suffix)
   end
   pfile:close()
 
-  -- spit out directory entries
-  -- print(tostring(#t) .. ' directory entries.')
+  -- check that the suffix is .lua
+  local st, suffix = {}, ".lua"
+  for _,v in ipairs(t) do
+    if string.endswith(v, suffix) then
+      table.insert(st,v)
+    end
+  end
+  t = st
 
-  if suffix ~= nil then
-    local nt, ind = {}, 0
-    for _,v in ipairs(t) do
-      ind = ind + 1
+  if prefix ~= nil then
+    print(tostring(prefix))
+    local nt = {}
+    for ind,v in ipairs(t) do
       print(tostring(ind)..' - '..tostring(v))
-      if string.endswith(v, suffix) then
-        -- print("it's true: "..v)
-        nt[ind] = v
+      if string.isValidFilename(v) and string.beginswith(v, prefix) then
+        table.insert(nt,v)
       end
     end
-    -- print(tostring(#nt) .. ", final entries.")
     t = nt
   end
-
   return t
 end
