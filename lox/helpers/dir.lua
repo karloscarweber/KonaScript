@@ -7,7 +7,7 @@ Dir = {}
 -- Scans a directory and returns a table of directory listings.
 -- @directory [String] a directory to search
 -- @prefix [String] an optional prefix to the files you want to grab.
-Dir.scandir = function(directory, prefix)
+Dir.filter = function(directory, prefix, suffix)
   local i, t, popen = 0, {}, io.popen
   local pfile = popen('ls -a "'..directory..'"')
   for filename in pfile:lines() do
@@ -17,7 +17,8 @@ Dir.scandir = function(directory, prefix)
   pfile:close()
 
   -- check that the suffix is .lua
-  local st, suffix = {}, ".lua"
+  if not suffix then suffix = ".lua" end
+  local st = {}
   for _,v in ipairs(t) do
     if string.endswith(v, suffix) then
       table.insert(st,v)
@@ -36,5 +37,12 @@ Dir.scandir = function(directory, prefix)
     end
     t = nt
   end
-  return t
+
+  -- add directory prefix
+  local fp = {}
+  for _,f in ipairs(t) do
+    table.insert(fp, directory .. "/" .. f)
+  end
+
+  return fp
 end
