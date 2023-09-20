@@ -15,7 +15,7 @@ Dots = {}
 -- @prefix [String] A prefix for the files to grab for the tests,
 --   defaults to 'test_'
 function Dots:new(directory, prefix)
-  t = {tasks = {}, results = {}
+  t = {tasks = {}, results = {}}
   setmetatable(t, Dots)
 --   prfx = prefix
 --   if prefix == nil then
@@ -121,6 +121,8 @@ function Task:execute()
   end
 end
 
+Task.Test = {}
+
 -- Create an assertion object
 function Task.Test.Assertion(name, status, message)
   local result = {
@@ -168,11 +170,14 @@ Dots.AssertionsObject = {
     end
 
     local res = self:___recursiveShape(value, control)
-    local status = if #res > 0 then return false else return true end
+    local status = true
+    if #res > 0 then status = false end
     return Assertion("_shape_assertion",status, message)
   end,
   -- only called by shape, checks a table to make sure that it matches, recursively.
-  -- checking shape assumes that a table value is being checked, and that
+  -- checking shape assumes that a table value is being checked, and that we
+  -- only check the types and presence of keys and values.
+  --
   ___recursiveShape = function(value, control)
     local res = {}
     for k,v in ipairs(control) do
@@ -191,13 +196,6 @@ Dots.AssertionsObject = {
     return res
   end
 }
-
-_equal
-_truthy
-_false
-_match
-_shape
-
 
 -- Utilities for the testing framework.
 Dots._utilities = {
