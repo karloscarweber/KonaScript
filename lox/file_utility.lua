@@ -28,8 +28,8 @@ end
 
 -- reads the whole file and returns the result. great for getting stuff for our interpreter.
 function File.read(file)
-	local thing = io.open(file, "rb")
-	local result = thing:read("a")
+	local f = io.open(file, "rb")
+	local result = f:read("a")
 	return result
 end
 
@@ -40,12 +40,8 @@ function File.print_lines_from(lines)
 	end
 end
 
-File = {
-	exists = file_exists,
-	lines = lines,
-	read = read,
-	print_lines_from = print_lines_from,
-}
+File.exists = File.file_exists
+File.print_lines_from = File.lines
 
 -- test it:
 -- local file = 'main.lua'
