@@ -18,9 +18,10 @@ Dots = {}
 -- Returns -> Dots[Object]
 --    tasks [Array], an Array of tasks to execute
 --    tasks [Array], an Array where new tests are added.
-function Dots:new(directory, prefix)
-  t = {tasks = {}, results = {}, test_destination = {}
+function Dots:new()
+  t = {tasks = {}, results = {}, test_destination = {}}
   setmetatable(t, Dots)
+  self.__index = self
   return t
 end
 
@@ -63,7 +64,7 @@ Dots.tests_in = function(directory, prefix)
   local dir, pre = directory, prefix
   if dir == nil then dir = 'test' end
   if pre == nil then pre = 'test_' end
-  return Dir.scandir(dir, pre)
+  return Dir.filter(dir, pre, nil)
 end
 
 -- You add tasks to a Dots instance, and then execute them.
@@ -93,10 +94,10 @@ function Task:new(name, filelist)
 
   -- scan filelist
   if type(filelist) == 'table' then
-    for _,f in filelist do
+    for _,f in ipairs(filelist) do
       -- load the files safely, printing an error, and skipping a test,
       -- if there is an error.
-      if File.file_exists(f) then
+      if File.exists(f) then
         local file = File.read(f)
         local succeeded, response = pcall( load(file) )
 
