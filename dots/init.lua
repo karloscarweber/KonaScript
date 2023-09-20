@@ -1,8 +1,8 @@
 -- init.lua
 
 -- dots entry point
-
 require 'lox/helpers/dir'
+require 'lox/file_utility'
 
 Dots = {}
 
@@ -27,6 +27,8 @@ function Dots:new(directory, prefix)
 end
 
 -- Add a task to the Dots Namespace
+-- A task is a collection of tests, Usually assembled by domain, that run
+-- together in random order.
 function Dots:add(task)
   self.tasks[#self.tasks + 1] = task
   return self -- return self to chain task adding.
@@ -78,10 +80,11 @@ Task = Dots.Task
 -- the code is run in different Lua State so as not to pollute the test state.
 
 -- used to start building a list of files to test.
-function Task:new(filelist)
+function Task:new(name, filelist)
   local tusk = {
-    tests = {}, -- a Dots.Task.Test object goes here.
-    -- a test has:
+    name = name,
+    tests = {}, -- a Dots.Task.Test objects goes here.
+    -- a test has results:
     results = {} -- filled with the results of the tests.
   }
   setmetatable(tusk, Task)
@@ -89,7 +92,10 @@ function Task:new(filelist)
   -- scan filelist
   if type(filelist) == 'table' then
     for _,f in filelist do
-      -- scan file for tests
+      -- load the files safely, printing an error, and skipping a test,
+      -- if there is an error.
+      if File.file_exists(f)
+      local ok, response = pcall( load(f) )
     end
   end
 
@@ -234,28 +240,34 @@ Dots._utilities = {
 }
 
 -- Test prototype, found when scanning the test files.
-Dots.Task.Test = {
+Dots.Test = {
   name = "",
   file = "",
   line = "",
   error = nil -- A string is put here when it fails with an error code.
 }
 
+-- creates a new Test object
+--
+-- Use this in your test files to create a new test then add it to the list of all tests.
+function Dots.Test:new()
+end
+
 -- code run to setup the environment for a task
-function Dots.Task:setup()
+function Dots.Test:setup()
 end
 
 -- function to run code before you execute each test in a task.
-function Dots.Task:before()
+function Dots.Test:before()
 end
 
 -- function to run code after each test in a task.
-function Dots.Task:after()
+function Dots.Test:after()
 end
 
 -- Completes the task and adds the results to the parent list of results to await
 -- output.
-function Dots.Task:complete()
+function Dots.Test:complete()
 end
 
 -- Dots.Task.
