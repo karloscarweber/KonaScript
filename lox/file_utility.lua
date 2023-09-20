@@ -29,7 +29,8 @@ end
 -- reads the whole file and returns the result. great for getting stuff for our interpreter.
 function File.read(file)
 	local f = io.open(file, "rb")
-	local result = f:read("a")
+	local result = f:read("*a")
+	f:close()
 	return result
 end
 

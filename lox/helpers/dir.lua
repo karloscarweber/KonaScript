@@ -27,10 +27,10 @@ Dir.filter = function(directory, prefix, suffix)
   t = st
 
   if prefix ~= nil then
-    print(tostring(prefix))
+    -- print(tostring(prefix))
     local nt = {}
     for ind,v in ipairs(t) do
-      print(tostring(ind)..' - '..tostring(v))
+      -- print(tostring(ind)..' - '..tostring(v))
       if string.isValidFilename(v) and string.beginswith(v, prefix) then
         table.insert(nt,v)
       end

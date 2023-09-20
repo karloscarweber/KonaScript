@@ -4,12 +4,10 @@ require 'dots' -- Require the testing framework
 -- require 'my_other_code' -- require your other code to test
 
 -- A Sample Test file.
-local basic_test = Dots.Test.new("basic")
+local basic_test = Dots.Test:new("basic")
 
 -- Test the testing framework
-basic_test
-
-:add("Add a test to a test framework.", function(r)
+basic_test:add("Add a test to a test framework.", function(r)
   local falsey = true
   local str = "string"
   local thing = 5
@@ -19,9 +17,9 @@ basic_test
   return r
 end)
 
-:add("Add another little thing to these tests.", function(r)
+basic_test:add("Add another little thing to these tests.", function(r)
   local silly = "silly"
   local tab = {name="", address="", cars={"ford","honda","mini"}}
   r._match(silly,"silly", "Silly Does not match and why not?")
-  r._shape(tab,{name="string",address="string",cars="table", ["___cars"]={"string"}}})
+  r._shape(tab,{name="string",address="string",cars="table", ["___cars"]={"string"}})
 end)

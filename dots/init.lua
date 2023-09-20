@@ -38,11 +38,11 @@ function Dots:execute()
   local results = {}
   for _,task in ipairs(self.tasks) do
     if task.execute ~= nil and type(task.execute) == 'function' then
-      local r = task.execute()
-      table.insert(results, r)
+      table.insert(results, task:execute())
     end
   end
   table.insert(self.results, results)
+  print("Executed tests")
 end
 
 -- tests_in,
@@ -87,6 +87,7 @@ function Task:new(name, filelist)
     results = {} -- filled with the results of the tests.
   }
   setmetatable(tusk, Task)
+  self.__index = self
 
   -- Set the task destination to the current task
   local old_test_destination = Dots.test_destination
@@ -131,10 +132,10 @@ function Task:add(summary, funk)
 end
 
 function Task:execute()
-  -- sequential
-  for _,v in ipairs(tests) do
+  for _,v in ipairs(self.tests) do
     -- execute the test
-    local ok, response = pcall( v.funk() )
+    local assertion_object = Dots.AssertionsObject:new()
+    local ok, response = pcall( v.funk(assertion_object) )
     local result = {
       test_name = v.summary,
       ok = ok,
@@ -143,8 +144,10 @@ function Task:execute()
     -- store the result in the results thing.
     table.insert(self.results, result)
   end
+  return self.results
 end
 
+-- Test namespace
 Task.Test = {}
 
 -- Create an assertion object
@@ -164,39 +167,46 @@ Dots.AssertionsObject = {
   new = function()
     t = {results = {}}
     setmetatable(t, Dots.AssertionsObject)
+    self.__index = self
     return t
   end,
   debug_data = function() end,
   _equal = function(value, control, message)
     local status = true
     if value ~= control then status = false end
-    return Assertion("_match_assertion", status, message)
+    table.insert(self.results, Assertion("_equal_assertion", status, message))
+    return nil
   end,
   _truthy = function(value, message)
     local status = true
     if not value then status = false end
-    return Assertion("_false_assertion", status, message)
+    table.insert(self.results, Assertion("_truthy_assertion", status, message))
+    return nil
   end,
   _false = function(value, message)
     local status = true
     if value then status = false end
-    return Assertion("_false_assertion", status, message)
+    table.insert(self.results, Assertion("_false_assertion", status, message))
+    return nil
   end,
   _match = function(value, control, message)
     local status = true
     if value ~= control then status = false end
-    return Assertion("_match_assertion", status, message)
+    table.insert(self.results, Assertion("_match_assertion", status, message))
+    return nil
   end,
   _shape = function(value, control, message)
     if type(value) ~= 'table' then
       -- return failure, value not table.
-      return Assertion("_shape_assertion",false, message)
+      table.insert(self.results, Assertion("_shape_assertion", false, message))
+      return nil
     end
 
     local res = self:___recursiveShape(value, control)
     local status = true
     if #res > 0 then status = false end
-    return Assertion("_shape_assertion",status, message)
+    table.insert(self.results, Assertion("_shape_assertion", status, message))
+    return nil
   end,
   -- only called by shape, checks a table to make sure that it matches, recursively.
   -- checking shape assumes that a table value is being checked, and that we
@@ -258,17 +268,28 @@ Dots._utilities = {
 }
 
 -- Test prototype, found when scanning the test files.
-Dots.Test = {
-  name = "",
-  file = "",
-  line = "",
-  error = nil -- A string is put here when it fails with an error code.
-}
+Dots.Test = {}
 
 -- creates a new Test object
 --
 -- Use this in your test files to create a new test then add it to the list of all tests.
-function Dots.Test:new()
+function Dots.Test:new(name)
+  -- Save this debug stuff for later.
+  -- print("calling function of Dots.Test:new  ")
+  -- print(debug.getinfo(2))
+  -- make the new Test prototype
+  t = {
+    name = bame, -- name of the test
+    file = "", -- figure out how to get the filename from the caller
+    error = nil -- A string is put here when it fails with an error code.
+  }
+  setmetatable(t, Dots.Test)
+  self.__index = self
+  return t
+end
+
+-- adds an actual assertion block to the test
+function Dots.Test:add()
 end
 
 -- code run to setup the environment for a task
