@@ -106,6 +106,100 @@ function Task:add(summary, funk)
   return self
 end
 
+function Task:execute()
+  -- sequential
+  for _,v in ipairs(tests) do
+    -- execute the test
+    local ok, response = pcall( v.funk() )
+    local result = {
+      test_name = v.summary,
+      ok = ok,
+      response = response
+    }
+    -- store the result in the results thing.
+    table.insert(self.results, result)
+  end
+end
+
+-- Create an assertion object
+function Task.Test.Assertion(name, status, message)
+  local result = {
+    name = "",
+    pass = status,
+    message = message,
+    results = {}
+  }
+  return result
+end
+
+Assertion = Task.Test.Assertion
+
+Dots.AssertionsObject = {
+  new = function()
+    t = {results = {}}
+    setmetatable(t, Dots.AssertionsObject)
+    return t
+  end,
+  debug_data = function() end,
+  _equal = function(value, control, message)
+    local status = true
+    if value ~= control then status = false end
+    return Assertion("_match_assertion", status, message)
+  end,
+  _truthy = function(value, message)
+    local status = true
+    if not value then status = false end
+    return Assertion("_false_assertion", status, message)
+  end,
+  _false = function(value, message)
+    local status = true
+    if value then status = false end
+    return Assertion("_false_assertion", status, message)
+  end,
+  _match = function(value, control, message)
+    local status = true
+    if value ~= control then status = false end
+    return Assertion("_match_assertion", status, message)
+  end,
+  _shape = function(value, control, message)
+    if type(value) ~= 'table' then
+      -- return failure, value not table.
+      return Assertion("_shape_assertion",false, message)
+    end
+
+    local res = self:___recursiveShape(value, control)
+    local status = if #res > 0 then return false else return true end
+    return Assertion("_shape_assertion",status, message)
+  end,
+  -- only called by shape, checks a table to make sure that it matches, recursively.
+  -- checking shape assumes that a table value is being checked, and that
+  ___recursiveShape = function(value, control)
+    local res = {}
+    for k,v in ipairs(control) do
+      if value[k] == nil then
+        table.insert(res, "Missing key: " .. tostring(k))
+      end
+      local tv = type(value[k])
+      if tv ~= v then
+        table.insert(res, "Index: "..tostring(k).." is "..tv..", expected: "..v)
+      end
+      if v == 'table' then
+        local rs = ___recursiveShape(value[k],control["___"..tostring(k)])
+        if #rs > 0 then table.insert(res,rs) end
+      end
+    end
+    return res
+  end
+}
+
+_equal
+_truthy
+_false
+_match
+_shape
+
+
+-- Utilities for the testing framework.
 Dots._utilities = {
 
   -- You know what would be cool! is that with scan file
@@ -118,7 +212,7 @@ Dots._utilities = {
   -- other token splits can be `task:before(`, `task:after`, and `task:complete`.
   -- When an error is encountered when parsing a test then we'll report that before we
   -- run the tests.
-  scan_file = function(filename)
+  -- scan_file = function(filename)
     -- open the file and read the contents
     -- split the file based on whitespace and new lines
     -- find test function definitions in the style of:
@@ -128,17 +222,17 @@ Dots._utilities = {
     --    end)
     -- ```
     --
-    local lines = {}
-    for line in io.lines(filename) do
-      lines[#lines + 1] = line
-    end
-    local tests = {}
+--     local lines = {}
+--     for line in io.lines(filename) do
+--       lines[#lines + 1] = line
+--     end
+--     local tests = {}
+--
+--     for i,l in ipairs(lines) do
+--       print("line: ["..tostring(i).."] "..l)
+--     end
 
-    for i,l in ipairs(lines) do
-      print("line: ["..tostring(i).."] "..l)
-    end
-
-  end,
+  -- end,
 }
 
 -- Test prototype, found when scanning the test files.
