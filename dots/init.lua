@@ -14,15 +14,13 @@ Dots = {}
 -- @directory [String] A string representing the directory to search.
 -- @prefix [String] A prefix for the files to grab for the tests,
 --   defaults to 'test_'
+--
+-- Returns -> Dots[Object]
+--    tasks [Array], an Array of tasks to execute
+--    tasks [Array], an Array where new tests are added.
 function Dots:new(directory, prefix)
-  t = {tasks = {}, results = {}}
+  t = {tasks = {}, results = {}, test_destination = {}
   setmetatable(t, Dots)
---   prfx = prefix
---   if prefix == nil then
---     -- we don't need a prefix then.
---     local prfx = "test_"
---   end
---   local files = Dir.scandir(directory, '.lua')
   return t
 end
 
@@ -89,15 +87,34 @@ function Task:new(name, filelist)
   }
   setmetatable(tusk, Task)
 
+  -- Set the task destination to the current task
+  local old_test_destination = Dots.test_destination
+  Dots.test_destination = tusk
+
   -- scan filelist
   if type(filelist) == 'table' then
     for _,f in filelist do
       -- load the files safely, printing an error, and skipping a test,
       -- if there is an error.
-      if File.file_exists(f)
-      local ok, response = pcall( load(f) )
+      if File.file_exists(f) then
+        local file = File.read(f)
+        local succeeded, response = pcall( load(file) )
+
+        if succeeded ~= true then
+          -- Damn it failed
+          print("Tests Failed to load. Found syntax errors: "..response)
+        end
+      else
+        print("File doesn't exist for test: "..f)
+      end
     end
   end
+
+  -- move the tests over
+  tusk.tests = Dots.test_destination
+
+  -- Reset the task destination to the original destination
+  Dots.test_destination = old_test_destination
 
   return tusk
 end
