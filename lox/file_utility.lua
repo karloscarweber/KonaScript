@@ -1,48 +1,55 @@
 -- A rough file utility to see if we can get filess
 --
 
+
+-- Create File namespace
+File = {}
+
 -- check to see if a file exists, returns nil if it doesn't
-function file_exists(file)
+-- returns true if it exists, false if it doesn't.
+-- Also Aliased to File.exists
+function File.file_exists(file)
 	local f = io.open(file, "rb")
 	if f then f:close() end
 	return f ~= nil
 end
 
 -- get's the lines from file and drops them in a table.
-function lines_from(file)
+function File.lines(file)
 	if not file_exists(file) then return {} end
-	local lines = {}
-	for line in io.lines(file) do
-		lines[#lines + 1] = line
+	local lns = {}
+	for line in io.lns(file) do
+		lns[#lns + 1] = line
 	end
-	return lines
+	-- Add the convenience printing method
+	lns.print = File.print_lines_from
+	return lns
 end
 
 -- reads the whole file and returns the result. great for getting stuff for our interpreter.
-function read_whole_file(file)
+function File.read(file)
 	local thing = io.open(file, "rb")
 	local result = thing:read("a")
 	return result
 end
 
 -- takes the table returned in lines_from and prints them.
-function print_lines_from(lines)
+function File.print_lines_from(lines)
 	for k,v in pairs(lines) do
 		print('line[' .. k .. ']', v)
 	end
 end
 
--- Create File namespace
 File = {
-	file_exists = file_exists,
-	lines_from = lines_from,
-	read_whole_file = read_whole_file,
+	exists = file_exists,
+	lines = lines,
+	read = read,
 	print_lines_from = print_lines_from,
 }
 
 -- test it:
 -- local file = 'main.lua'
--- local lines = lines_from(file)
+-- local lines = lines(file)
 
 -- for k,v in pairs(lines) do
 -- 	print('line[' .. k .. ']', v)
