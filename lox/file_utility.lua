@@ -32,6 +32,14 @@ function print_lines_from(lines)
 	end
 end
 
+-- Create File namespace
+File = {
+	file_exists = file_exists,
+	lines_from = lines_from,
+	read_whole_file = read_whole_file,
+	print_lines_from = print_lines_from,
+}
+
 -- test it:
 -- local file = 'main.lua'
 -- local lines = lines_from(file)
