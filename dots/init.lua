@@ -6,7 +6,7 @@ require 'lox/helpers/dir'
 
 Dots = {}
 
--- makes a new dots namespace thing.
+-- makes a new dots context thing.
 -- used to start building a test sequence.
 -- returns an object that references the Dots table as a
 -- metatable. The returned object runs the tasks found in the tasks
@@ -14,15 +14,34 @@ Dots = {}
 -- @directory [String] A string representing the directory to search.
 -- @prefix [String] A prefix for the files to grab for the tests,
 --   defaults to 'test_'
-Dots.new = function(directory, prefix)
-  prfx = prefix
-  if prefix == nil then
-    -- we don't need a prefix then.
-    local prfx = "test_"
+function Dots:new(directory, prefix)
+  t = {tasks = {}, results = {}
+  setmetatable(t, Dots)
+--   prfx = prefix
+--   if prefix == nil then
+--     -- we don't need a prefix then.
+--     local prfx = "test_"
+--   end
+--   local files = Dir.scandir(directory, '.lua')
+  return t
+end
+
+-- Add a task to the Dots Namespace
+function Dots:add(task)
+  self.tasks[#self.tasks + 1] = task
+  return self -- return self to chain task adding.
+end
+
+-- Execute the tasks associated with a context
+function Dots:execute()
+  local results = {}
+  for _,task in ipairs(self.tasks) do
+    if task.execute ~= nil and type(task.execute) == 'function' then
+      local r = task.execute()
+      table.insert(results, r)
+    end
   end
-
-  local files = Dir.scandir(directory, '.lua')
-
+  table.insert(self.results, results)
 end
 
 -- tests_in,
@@ -51,6 +70,7 @@ end
 
 -- Namespace for the Task object
 Dots.Task = {}
+Task = Dots.Task
 
 -- Makes a new dots task
 -- the task is used to run the code in a test_*.lua file, then records the
@@ -58,13 +78,13 @@ Dots.Task = {}
 -- the code is run in different Lua State so as not to pollute the test state.
 
 -- used to start building a list of files to test.
-Dots.Task.new = function(filelist)
-  local task = {
+function Task:new(filelist)
+  local tusk = {
     tests = {}, -- a Dots.Task.Test object goes here.
     -- a test has:
     results = {} -- filled with the results of the tests.
   }
-  setmetatable(task, Task)
+  setmetatable(tusk, Task)
 
   -- scan filelist
   if type(filelist) == 'table' then
@@ -73,11 +93,11 @@ Dots.Task.new = function(filelist)
     end
   end
 
-  return task
+  return tusk
 end
 
 -- Adds a new test in a test file to the Task bundle thing.
-Dots.Task.add = function(summary, funk)
+function Task:add(summary, funk)
   local  new_test = {
     summary = summary,
     funk = funk
@@ -130,16 +150,20 @@ Dots.Task.Test = {
 }
 
 -- code run to setup the environment for a task
-Dots.Task.setup = {}
+function Dots.Task:setup()
+end
 
 -- function to run code before you execute each test in a task.
-Dots.Task.before = {}
+function Dots.Task:before()
+end
 
 -- function to run code after each test in a task.
-Dots.Task.after = {}
+function Dots.Task:after()
+end
 
 -- Completes the task and adds the results to the parent list of results to await
 -- output.
-Dots.Task.complete = {}
+function Dots.Task:complete()
+end
 
 -- Dots.Task.
