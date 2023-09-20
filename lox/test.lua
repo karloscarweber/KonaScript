@@ -1,27 +1,13 @@
 -- lox/test.lua
-require 'lox/helpers/dir'
 require 'dots'
 
 -- Setup Testing Context
-local context = Dots:new()
+context = Dots:new()
 
-context:add(Dots.Task:new())
 
--- test file for all of lox lua
-
--- Begin test helper
-
-  -- grab all files from test directory
-  -- function scandir(directory)
-  --   local i, t, popen = 0, {}, io.popen
-  --   local pfile = popen('ls -a "'..directory..'"')
-  --   for filename in pfile:lines() do
-  --     i = i + 1
-  --     t[i] = filename
-  --   end
-  --   pfile:close()
-  --   return t
-  -- end
+test_files = Dots.tests_in('lox/test')
+tasky = Dots.Task:new("Basic Test", test_files)
+context:add(tasky)
 
 -- parse each on in order, logging syntax errors.
 
