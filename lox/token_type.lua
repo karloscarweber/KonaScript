@@ -1,5 +1,4 @@
 -- token_type.lua
-print("token_type loaded")
 
 LEFT_PAREN = "("
 RIGHT_PAREN = ")"

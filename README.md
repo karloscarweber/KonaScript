@@ -1,22 +1,30 @@
-# Stim
+# Kona
 
-An attempt to write a small programming language or DSL in LUA to make UI and code stuff for websites that's really great.
+Kona (or Konascript), is an attempt to write a small programming language to make User Interfaces for websites easier and more manageable.
 
-## Names?:
-	* Kona (kona-lang.org)
-	* Capsule
-	* Stim
+## Domains?:
+* kona.sh
+* konalang.org (redirects to kona.sh)
+* konascript.org (redirects to kona.sh)
+
+### Brew name?:
+* kna?
+* brew install konascript
+### file name:
+* kan
+* install.kan
 
 ## Why?
 Javascript is not the best. It's getting better, but ya know what... we could do better. I want a language that supports an expressive syntax to construct and manipulate Nested UI. One that is purpose built for the needs of the web and it's interface, and one that responds to and makes UI responsive and interactive.
 
 Purpose built for the web.
 
-Composablitiy is also a goal. Templating that works and looks like it belongs in the language, with language semantics to compile template strings into cacheable and quick templates. Contexts should be first class constructs, and it should be so damn easy that it's sick.
+Composability is also a goal. Templating that works and looks like it belongs in the language, with language semantics to compile template strings into cacheable and quick templates. Contexts should be first class constructs, and it should be so damn easy that it's sick.
 
 Animation: Expressive syntax to manipulate values over time, to broadcast the change of those values, and to provide in language facilities to ease from one value to another.
 
-Buildable, Objects broadcast their initililization to their containing block and are can natively recieve and bubble up event changes. Facilities for building view hiearchies that are pretty great, If I do say so myself. This requires a system to keep track of parent/child relationships. Probably reserving some variables to track these element would make sense.
+Buildable, Objects broadcast their initialization to their containing block and are can natively receive and bubble up event changes. Facilities for building view hierarchies that are pretty great, If I do say so myself. This requires a system to keep track of parent/child relationships. Probably reserving some variables to track these element would make sense.
+
 ```ruby
 class Element
   def initialize(name)
@@ -32,24 +40,24 @@ element.children
 # > }
 ```
 
-DOM ready, an expressive API for querying, modifying, and monitoring the DOM.
+DOM ready, an expressive API for querying, modifying, and monitoring the DOM. Responds to DOM changes by removing or adding corresponding DOM elements in code.
 
-templateable: Expressive syntax for creating, composing, and rendering xml based template systems, like Svg and Html.
-```ruby
+template able: Expressive syntax for creating, composing, and rendering xml based template systems, like Svg and Html.
+```kona
 	class NameTag < Element
 
 		# You can write html directly into a Kona file. The template is stored as a special
 		# Template type. Which is a concatenated string. The template is assigned to the name of
-		# the custom tag that you declare, in the case of this template, it's nameTag
-		<nameTag name="jimbo" data-controller="another attribute">
+		# the custom tag that you declare, in the case of this template, it's nametag
+		<nametag name="jimbo" data-controller="another attribute">
 			<p>My Name</p>
-		</nameTag>
+		</nametag>
 
 	end
 ```
 
 The template syntax above is syntactic sugar for:
-```lua
+```kona
 	ButtonList = Class.inheritFrom(Element)
 	ButtonList.template = Template("nameTag", [[<nameTag name="jimbo" data-controller="another attribute">
 		<p>My Name</p>
@@ -57,7 +65,7 @@ The template syntax above is syntactic sugar for:
 ```
 
 The `Template` class is important in this instance. By convention, the name of the template tag matches the containing object's name. But this doesn't have to be the case. giving the template an explicit assignment to local variable is also possible.
-```stim
+```kona
 	template_name = <nameTag name="jimbo" data-controller="another attribute">
 			<p>My Name</p>
 	</nameTag>
@@ -65,18 +73,36 @@ The `Template` class is important in this instance. By convention, the name of t
 
 Objects can also be constructed almost instantly from valid JSON. Although always sanitize your inputs:
 ```json
-	person = {
-		"name" = "Jim Kirk",
-		"address" = {
-			"street" = "55 Rosa Parks Dr",
-			"street2" = "", "city" = "Victory City",
-			"state" = "California", "zip" = "90210",
+{
+	"person": {
+		"name": "Jim Kirk",
+		"address": {
+			"street": "55 Rosa Parks Dr",
+			"street2": "",
+			"city": "Victory City",
+			"state": "California",
+			"zip": "90210",
 		},
-		"phone" = "555-992-5050"
+		"phone": "555-992-5050"
 	}
+}
 ```
 
-Builtin Facilities for sanitization of common input and for the validation of that input.
+valid string identifiers can omit enclosing quotes:
+
+```json
+{
+	cars: [
+		{
+			make:"Mazda",
+			model:"3",
+			price:1399900,
+		},
+	]
+}
+```
+
+Built in Facilities for sanitization of common input and for the validation of that input.
 
 Object Oriented and Functional. Everything is an object, but functions are also first class objects. A simplified inheritance chain. Able to modify an existing object through inheritance, mixins, includes, and extends. Or maybe just a couple of those. First class functions are kinda interesting, when mixed with Object oriented programming. In Ruby, for example, everything is an object and you send messages to objects to get them to do stuff. If functions are first class objects then they can be stored. what's the default message that you send to a function? What are the default messages for objects?
 
