@@ -38,10 +38,9 @@ end
 function Dots:execute()
   for _,task in ipairs(self.tasks) do
     if task.execute ~= nil and type(task.execute) == 'function' then
-      print("Executing test")
       table.insert(self.results, task:execute())
     else
-      print("something is not right")
+      print("Error, Tasks found can't be executed. No Execute Command.")
     end
   end
   -- print("Executed tests")
@@ -74,6 +73,7 @@ function Dots:print_results()
   test_string = test_string .. "\n"
 
   -- Now that we have our results, print them.
+  print("________________________________________________________________________________")
   print(test_string)
   print(test_count.." Tests, "..tostring(#error_list).." Failures.\n")
 
@@ -86,9 +86,6 @@ function Dots:print_results()
     end
   end
 
-  -- for _,v in ipairs(self.results) do
-  -- end
-  -- table.dump(self.results)
 end
 
 -- tests_in,
@@ -171,9 +168,6 @@ function Task:execute()
     -- execute the test
     local assertion_object = Dots.AssertionsObject:new()
     local ok, response = pcall( v.funk(assertion_object) )
-
-    -- print("assertion_object.results:")
-    -- table.dump(assertion_object.results)
 
     -- probably have to look at the assertion_object for the test results when
     -- it doesn't error out.
@@ -264,43 +258,6 @@ function Dots.AssertionsObject:___recursiveShape(value, control)
   return res
 end
 
-
--- Utilities for the testing framework.
-Dots._utilities = {
-
-  -- You know what would be cool! is that with scan file
-  -- we would find the tests, and report syntax errors in the tests file while
-  -- still parsing the rest of the file. We just need a really light token grammer.
-  -- basically we'll split the file based on common test declarations, then execute
-  -- the code between these declarations.
-  --
-  -- example `task:add(` is starting token for the task, split there.
-  -- other token splits can be `task:before(`, `task:after`, and `task:complete`.
-  -- When an error is encountered when parsing a test then we'll report that before we
-  -- run the tests.
-  -- scan_file = function(filename)
-    -- open the file and read the contents
-    -- split the file based on whitespace and new lines
-    -- find test function definitions in the style of:
-    -- ```lua
-    --    t.add_test("A test to add.", function()
-    --      -- Code to execute.
-    --    end)
-    -- ```
-    --
---     local lines = {}
---     for line in io.lines(filename) do
---       lines[#lines + 1] = line
---     end
---     local tests = {}
---
---     for i,l in ipairs(lines) do
---       print("line: ["..tostring(i).."] "..l)
---     end
-
-  -- end,
-}
-
 -- Test prototype, found when scanning the test files.
 Dots.Test = {}
 
@@ -325,7 +282,6 @@ end
 
 -- adds an actual assertion block to the test
 function Dots.Test:add(test_name, funk)
-  print("Adding test: ".. test_name)
   if funk == nil then print("funk was nil for that last test") end
   table.insert(Dots.test_destination, {name=test_name, funk=funk})
 end
@@ -346,5 +302,3 @@ end
 -- output.
 function Dots.Test:complete()
 end
-
--- Dots.Task.
