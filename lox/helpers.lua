@@ -45,11 +45,37 @@ end
 -- add a has value function to table
 -- returns true if the
 function table.has_value (tab, val)
-    for _, value in ipairs(tab) do
-        if value == val then
-            return true
-        end
-    end
+  for _, value in ipairs(tab) do
+  	if value == val then
+    	return true
+  	end
+  end
 
-    return false
+  return false
+end
+
+-- indent function
+function string.indent(depth)
+	local buff, ord = "", 0
+if depth == nil then depth = 1 end
+	while ord < depth do
+		buff = buff .. " "
+		ord = ord + 1
+	end
+	return buff
+end
+
+-- Dumps a table
+function table.dump(tab, indent)
+	local ind = tonumber(indent)
+	if ind == nil then ind = 1 end
+	local indie = string.indent(ind)
+	for key, value in ipairs(tab) do
+		if type(value) == 'table' then
+			print(indie.."["..tostring(key).."] : "..tostring(value).." ("..tostring(#value)..")")
+			table.dump(value, (ind+1))
+		else
+			print(indie.."["..tostring(key).."] : "..tostring(value))
+		end
+	end
 end

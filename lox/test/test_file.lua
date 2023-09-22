@@ -20,6 +20,7 @@ end)
 basic_test:add("Add another little thing to these tests.", function(r)
   local silly = "silly"
   local tab = {name="", address="", cars={"ford","honda","mini"}}
-  r._match(silly,"silly", "Silly Does not match and why not?")
-  r._shape(tab,{name="string",address="string",cars="table", ["___cars"]={"string"}})
+  r:_truthy(silly == "silly", "Silly Does not match and why not?")
+  r:_shape(tab,{name="string",address="string",cars="table", ["___cars"]={"string"}})
+  return r
 end)

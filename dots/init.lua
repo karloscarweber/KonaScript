@@ -3,6 +3,7 @@
 -- dots entry point
 require 'lox/helpers/dir'
 require 'lox/file_utility'
+require 'lox/helpers'
 
 Dots = {}
 
@@ -35,14 +36,22 @@ end
 
 -- Execute the tasks associated with a context
 function Dots:execute()
-  local results = {}
   for _,task in ipairs(self.tasks) do
     if task.execute ~= nil and type(task.execute) == 'function' then
-      table.insert(results, task:execute())
+      print("Executing test")
+      table.insert(self.results, task:execute())
+    else
+      print("something is not right")
     end
   end
-  table.insert(self.results, results)
   print("Executed tests")
+  self:print_results()
+end
+
+function Dots:print_results()
+  -- for _,v in ipairs(self.results) do
+  -- end
+  table.dump(self.results)
 end
 
 -- tests_in,
@@ -91,7 +100,7 @@ function Task:new(name, filelist)
 
   -- Set the task destination to the current task
   local old_test_destination = Dots.test_destination
-  Dots.test_destination = tusk
+  Dots.test_destination = tusk.tests
 
   -- scan filelist
   if type(filelist) == 'table' then
@@ -103,7 +112,6 @@ function Task:new(name, filelist)
         local succeeded, response = pcall( load(file) )
 
         if succeeded ~= true then
-          -- Damn it failed
           print("Tests Failed to load. Found syntax errors: "..response)
         end
       else
@@ -122,24 +130,37 @@ function Task:new(name, filelist)
 end
 
 -- Adds a new test in a test file to the Task bundle thing.
-function Task:add(summary, funk)
-  local  new_test = {
-    summary = summary,
-    funk = funk
-  }
-  self.tests[#self.tests + 1] = new_test
-  return self
-end
+-- function Task:add(summary, funk)
+--   print("Task being added")
+--   local new_test = {
+--     summary = summary,
+--     funk = funk
+--   }
+--   self.tests[#self.tests + 1] = new_test
+--   return self
+-- end
 
 function Task:execute()
+  print("... executing test")
   for _,v in ipairs(self.tests) do
+
+    print("trying to run a test:")
+    print(v.name)
     -- execute the test
     local assertion_object = Dots.AssertionsObject:new()
+    print("type of v.funk: "..type(v.funk))
+    print("type of assertion_object: "..type(assertion_object))
     local ok, response = pcall( v.funk(assertion_object) )
+
+    print("assertion_object")
+    table.dump(assertion_object.results)
+
+    -- probably have to look at the assertion_object for the test results when
+    -- it doesn't error out.
     local result = {
-      test_name = v.summary,
+      name = v.name,
       ok = ok,
-      response = response
+      results = results,
     }
     -- store the result in the results thing.
     table.insert(self.results, result)
@@ -148,88 +169,85 @@ function Task:execute()
 end
 
 -- Test namespace
-Task.Test = {}
+-- Task.Test = {}
 
 -- Create an assertion object
-function Task.Test.Assertion(name, status, message)
-  local result = {
+function Dots.Assertion(name, status, message)
+  return {
     name = "",
     pass = status,
-    message = message,
-    results = {}
+    message = message
   }
-  return result
 end
 
-Assertion = Task.Test.Assertion
+Assertion = Dots.Assertion
+Dots.AssertionsObject = {}
+function Dots.AssertionsObject:new()
+  t = {results = {}}
+  setmetatable(t, Dots.AssertionsObject)
+  self.__index = self
+  return t
+end
+  -- debug_data = function() end,
+function Dots.AssertionsObject:_equal(value, control, message)
+  local status = true
+  if value ~= control then status = false end
+  table.insert(self.results, Assertion("_equal_assertion", status, message))
+  return nil
+end
+function Dots.AssertionsObject:_truthy(value, message)
+  local status = true
+  if not value then status = false end
+  table.insert(self.results, Assertion("_truthy_assertion", status, message))
+  return nil
+end
+function Dots.AssertionsObject:_false(value, message)
+  local status = true
+  if value then status = false end
+  table.insert(self.results, Assertion("_false_assertion", status, message))
+  return nil
+end
+function Dots.AssertionsObject:_match(value, control, message)
+  local status = true
+  if value ~= control then status = false end
+  table.insert(self.results, Assertion("_match_assertion", status, message))
+  return nil
+end
+function Dots.AssertionsObject:_shape(value, control, message)
+  if type(value) ~= 'table' then
+    -- return failure, value not table.
+    table.insert(self.results, Assertion("_shape_assertion", false, message))
+    return nil
+  end
 
-Dots.AssertionsObject = {
-  new = function()
-    t = {results = {}}
-    setmetatable(t, Dots.AssertionsObject)
-    self.__index = self
-    return t
-  end,
-  debug_data = function() end,
-  _equal = function(value, control, message)
-    local status = true
-    if value ~= control then status = false end
-    table.insert(self.results, Assertion("_equal_assertion", status, message))
-    return nil
-  end,
-  _truthy = function(value, message)
-    local status = true
-    if not value then status = false end
-    table.insert(self.results, Assertion("_truthy_assertion", status, message))
-    return nil
-  end,
-  _false = function(value, message)
-    local status = true
-    if value then status = false end
-    table.insert(self.results, Assertion("_false_assertion", status, message))
-    return nil
-  end,
-  _match = function(value, control, message)
-    local status = true
-    if value ~= control then status = false end
-    table.insert(self.results, Assertion("_match_assertion", status, message))
-    return nil
-  end,
-  _shape = function(value, control, message)
-    if type(value) ~= 'table' then
-      -- return failure, value not table.
-      table.insert(self.results, Assertion("_shape_assertion", false, message))
-      return nil
-    end
-
-    local res = self:___recursiveShape(value, control)
-    local status = true
-    if #res > 0 then status = false end
-    table.insert(self.results, Assertion("_shape_assertion", status, message))
-    return nil
-  end,
+  local res = self:___recursiveShape(value, control)
+  local status = true
+  if #res > 0 then status = false end
+  table.insert(self.results, Assertion("_shape_assertion", status, message))
+  return nil
+end
   -- only called by shape, checks a table to make sure that it matches, recursively.
   -- checking shape assumes that a table value is being checked, and that we
   -- only check the types and presence of keys and values.
   --
-  ___recursiveShape = function(value, control)
-    local res = {}
-    for k,v in ipairs(control) do
-      if value[k] == nil then
-        table.insert(res, "Missing key: " .. tostring(k))
-      end
-      local tv = type(value[k])
-      if tv ~= v then
-        table.insert(res, "Index: "..tostring(k).." is "..tv..", expected: "..v)
-      end
-      if v == 'table' then
-        local rs = ___recursiveShape(value[k],control["___"..tostring(k)])
-        if #rs > 0 then table.insert(res,rs) end
-      end
+function Dots.AssertionsObject:___recursiveShape(value, control)
+  local res = {}
+  for k,v in ipairs(control) do
+    if value[k] == nil then
+      table.insert(res, "Missing key: " .. tostring(k))
     end
-    return res
+    local tv = type(value[k])
+    if tv ~= v then
+      table.insert(res, "Index: "..tostring(k).." is "..tv..", expected: "..v)
+    end
+    if v == 'table' then
+      local rs = ___recursiveShape(value[k],control["___"..tostring(k)])
+      if #rs > 0 then table.insert(res,rs) end
+    end
   end
-}
+  return res
+end
+
 
 -- Utilities for the testing framework.
 Dots._utilities = {
@@ -279,7 +297,7 @@ function Dots.Test:new(name)
   -- print(debug.getinfo(2))
   -- make the new Test prototype
   t = {
-    name = bame, -- name of the test
+    name = name, -- name of the test
     file = "", -- figure out how to get the filename from the caller
     error = nil -- A string is put here when it fails with an error code.
   }
@@ -289,7 +307,10 @@ function Dots.Test:new(name)
 end
 
 -- adds an actual assertion block to the test
-function Dots.Test:add()
+function Dots.Test:add(test_name, funk)
+  print("Adding test: ".. test_name)
+  if funk == nil then print("funk was nil for that last test") end
+  table.insert(Dots.test_destination, {name=test_name, funk=funk})
 end
 
 -- code run to setup the environment for a task
