@@ -70,7 +70,7 @@ function table.dump(tab, indent)
 	local ind = tonumber(indent)
 	if ind == nil then ind = 1 end
 	local indie = string.indent(ind)
-	for key, value in ipairs(tab) do
+	for key, value in pairs(tab) do
 		if type(value) == 'table' then
 			print(indie.."["..tostring(key).."] : "..tostring(value).." ("..tostring(#value)..")")
 			table.dump(value, (ind+1))

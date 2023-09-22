@@ -44,14 +44,51 @@ function Dots:execute()
       print("something is not right")
     end
   end
-  print("Executed tests")
+  -- print("Executed tests")
   self:print_results()
 end
 
 function Dots:print_results()
+  local test_string, error_list, test_count = "Testing: ", {}, 0
+
+
+  -- table.dump(self.results)
+
+  -- Iterate over the Tests
+  for _,r in ipairs(self.results) do
+    for _,d in ipairs(r) do
+      -- Go through the results in the tests now.
+      for k,t in ipairs(d.results) do
+        test_count = test_count + 1
+        if t.pass == true then
+          test_string = test_string.."."
+        else
+          test_string = test_string.."x"
+          table.insert(error_list, "Test Failed in: "..d.name.."\n".."["..t.name.."] "
+          ..t.message.."\n")
+        end
+      end
+    end
+  end
+
+  test_string = test_string .. "\n"
+
+  -- Now that we have our results, print them.
+  print(test_string)
+  print(test_count.." Tests, "..tostring(#error_list).." Failures.\n")
+
+  if #error_list < 1 then
+    print("No errors.")
+  else
+    print("Errors!")
+    for _,v in ipairs(error_list) do
+      print(v)
+    end
+  end
+
   -- for _,v in ipairs(self.results) do
   -- end
-  table.dump(self.results)
+  -- table.dump(self.results)
 end
 
 -- tests_in,
@@ -91,16 +128,12 @@ Task = Dots.Task
 function Task:new(name, filelist)
   local tusk = {
     name = name,
-    tests = {}, -- a Dots.Task.Test objects goes here.
-    -- a test has results:
-    results = {} -- filled with the results of the tests.
+    tests = {},
+    results = {},
   }
   setmetatable(tusk, Task)
   self.__index = self
 
-  -- Set the task destination to the current task
-  local old_test_destination = Dots.test_destination
-  Dots.test_destination = tusk.tests
 
   -- scan filelist
   if type(filelist) == 'table' then
@@ -108,8 +141,18 @@ function Task:new(name, filelist)
       -- load the files safely, printing an error, and skipping a test,
       -- if there is an error.
       if File.exists(f) then
+
+        -- Move tests stuff around
+        local old_test_destination = Dots.test_destination
+        Dots.test_destination = tusk.tests
+
         local file = File.read(f)
         local succeeded, response = pcall( load(file) )
+
+        -- move the tests over
+        tusk.tests = Dots.test_destination
+        -- Reset the task destination to the original destination
+        Dots.test_destination = old_test_destination
 
         if succeeded ~= true then
           print("Tests Failed to load. Found syntax errors: "..response)
@@ -120,47 +163,23 @@ function Task:new(name, filelist)
     end
   end
 
-  -- move the tests over
-  tusk.tests = Dots.test_destination
-
-  -- Reset the task destination to the original destination
-  Dots.test_destination = old_test_destination
-
   return tusk
 end
 
--- Adds a new test in a test file to the Task bundle thing.
--- function Task:add(summary, funk)
---   print("Task being added")
---   local new_test = {
---     summary = summary,
---     funk = funk
---   }
---   self.tests[#self.tests + 1] = new_test
---   return self
--- end
-
 function Task:execute()
-  print("... executing test")
   for _,v in ipairs(self.tests) do
-
-    print("trying to run a test:")
-    print(v.name)
     -- execute the test
     local assertion_object = Dots.AssertionsObject:new()
-    print("type of v.funk: "..type(v.funk))
-    print("type of assertion_object: "..type(assertion_object))
     local ok, response = pcall( v.funk(assertion_object) )
 
-    print("assertion_object")
-    table.dump(assertion_object.results)
+    -- print("assertion_object.results:")
+    -- table.dump(assertion_object.results)
 
     -- probably have to look at the assertion_object for the test results when
     -- it doesn't error out.
     local result = {
       name = v.name,
-      ok = ok,
-      results = results,
+      results = assertion_object.results,
     }
     -- store the result in the results thing.
     table.insert(self.results, result)
@@ -168,13 +187,10 @@ function Task:execute()
   return self.results
 end
 
--- Test namespace
--- Task.Test = {}
-
 -- Create an assertion object
 function Dots.Assertion(name, status, message)
   return {
-    name = "",
+    name = name,
     pass = status,
     message = message
   }
@@ -299,7 +315,8 @@ function Dots.Test:new(name)
   t = {
     name = name, -- name of the test
     file = "", -- figure out how to get the filename from the caller
-    error = nil -- A string is put here when it fails with an error code.
+    error = nil, -- A string is put here when it fails with an error code.
+    tests = {}
   }
   setmetatable(t, Dots.Test)
   self.__index = self
