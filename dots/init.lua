@@ -159,7 +159,7 @@ function Task:new(name, filelist)
         Dots.test_destination = old_test_destination
 
         if succeeded ~= true then
-          print("Tests Failed to load. Found syntax errors: "..response)
+          print("Tests Failed to load. Found syntax errors: ["..response.."]")
         end
       else
         print("File doesn't exist for test: "..f)

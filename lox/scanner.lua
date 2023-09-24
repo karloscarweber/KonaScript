@@ -156,7 +156,7 @@ function Scanner:number()
 end
 
 function Scanner:string()
-  while (self:peek() ~= '"' or not(self:isAtEnd()) ) do
+  while (self:peek() ~= '"' and not self:isAtEnd() ) do
     if (self:peek() == '\n') then self.line = self.line + 1 end
     self:advance()
   end
@@ -168,10 +168,7 @@ function Scanner:string()
 
   self:advance()
 
-  local so,s,c = self.source,self.start,self.current
-
-  local v = string.sub(so, s + 1, c - 1)
-  self:addToken(STRING, v)
+  self:addToken(STRING, string.sub(self.source, self.start + 1, self.current - 1))
 end
 
 function Scanner:match(expected)
@@ -208,8 +205,7 @@ function Scanner:isDigit(c)
 end
 
 function Scanner:isAtEnd()
-  local stuff = self.source
-  return self.current >= #stuff
+  return self.current >= #self.source
 end
 
 function Scanner:advance()

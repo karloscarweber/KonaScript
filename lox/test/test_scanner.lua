@@ -8,21 +8,41 @@ require 'lox/scanner'
 local scanner_test = Dots.Test:new("scanner")
 
 -- Test the testing framework
-scanner_test:add("[test_scanner] Instantiation", function(r)
+scanner_test:add("[test_scanner] Scanner:new", function(r)
   local scanner = Scanner:new("Some random Source")
   local scanner2 = Scanner:new("Another Random Source")
   r:_truthy(scanner, "Scanner is not initialized")
   r:_truthy(scanner2, "Scanner is not initialized")
-
   r:_shape(scanner, {source="string", tokens={}, start="number", line="number",current="number"}, "Scanner object not in expected shape")
-
+  r:_truthy((tostring(scanner) ~= tostring(scanner2)), "Scanners are identical, not expected."..tostring(scanner).." == "..tostring(scanner2))
   return r
 end)
---
--- scanner_test:add("Add another little thing to these tests.", function(r)
---   local silly = "silly"
---   local tab = {name="", address="", cars={"ford","honda","mini"}}
---   r:_truthy(silly == "silly", "Silly Does not match and why not?")
---   r:_shape(tab,{name="string",address="string",cars="table", ["___cars"]={"string"}})
+
+scanner_test:add("[test_scanner] Scanner:Advance, Scanner:isAtEnd", function(r)
+  local scanner = Scanner:new("blank")
+  scanner:advance()
+  scanner:advance()
+  r:_truthy((scanner.current > 2), "Scanner does not advance.")
+  scanner:advance()
+  scanner:advance()
+  scanner:advance()
+  r:_truthy(scanner:isAtEnd() , "Scanner Does not accurately detect the end.")
+  return r
+end)
+
+-- scanner_test:add("[test_scanner] Scanner:", function(r)
+--   local scanner = Scanner:new("blank")
+--   scanner:advance()
+--   scanner:advance()
+--   r:_truthy((scanner.current > 2), "Scanner does not advance.")
 --   return r
 -- end)
+
+scanner_test:add("[test_scanner] Scanner:scanTokens", function(r)
+  local scanner = Scanner:new("identifer = \"5\"")
+  local tokens = scanner:scanTokens()
+  print(tokens)
+  r:_truthy(scanner, "Scanner is not initialized")
+  return r
+end)
+
