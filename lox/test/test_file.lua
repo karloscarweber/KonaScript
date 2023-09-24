@@ -7,7 +7,7 @@ require 'dots' -- Require the testing framework
 local basic_test = Dots.Test:new("basic")
 
 -- Test the testing framework
-basic_test:add("Add a test to a test framework.", function(r)
+basic_test:add("[test_file] Add a test to a test framework.", function(r)
   local falsey = false
   local str = "string"
   local thing = 5
@@ -17,10 +17,10 @@ basic_test:add("Add a test to a test framework.", function(r)
   return r
 end)
 
-basic_test:add("Add another little thing to these tests.", function(r)
+basic_test:add("[test_file] Add another little thing to these tests.", function(r)
   local silly = "silly"
   local tab = {name="", address="", cars={"ford","honda","mini"}}
   r:_truthy(silly == "silly", "Silly Does not match and why not?")
-  r:_shape(tab,{name="string",address="string",cars="table", ["___cars"]={"string"}})
+  r:_shape(tab,{name="string",address="string",cars={"string"}})
   return r
 end)
