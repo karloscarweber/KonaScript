@@ -63,8 +63,15 @@ function Dots:print_results()
           test_string = test_string.."."
         else
           test_string = test_string.."x"
+          local errors_string = ""
+          if t.errors ~= nil and type(t.errors) == 'table' then
+            for k,v in ipairs(t.errors) do
+              errors_string = "    "..errors_string .. v .. "\n"
+            end
+          end
+
           table.insert(error_list, "Test Failed in: "..d.name.."\n".."["..t.name.."] "
-          ..t.message.."\n")
+          ..t.message.."\n"..errors_string)
         end
       end
     end
@@ -75,7 +82,7 @@ function Dots:print_results()
   -- Now that we have our results, print them.
   print("________________________________________________________________________________")
   print(test_string)
-  print(test_count.." Tests, "..tostring(#error_list).." Failures.\n")
+  print(test_count.." Assertions, "..tostring(#error_list).." Failures.\n")
 
   if #error_list < 1 then
     print("No errors.")
@@ -182,11 +189,14 @@ function Task:execute()
 end
 
 -- Create an assertion object
-function Dots.Assertion(name, status, message)
+-- errors is optional, when it's not, it's an Array of Error Messages.
+function Dots.Assertion(name, status, message, errors)
+  if message == nil then message = "" end
   return {
     name = name,
     pass = status,
-    message = message
+    message = message,
+    errors = errors
   }
 end
 
@@ -223,6 +233,7 @@ function Dots.AssertionsObject:_match(value, control, message)
   table.insert(self.results, Assertion("_match_assertion", status, message))
   return nil
 end
+-- _shape tests the types of keys and not their values.
 function Dots.AssertionsObject:_shape(value, control, message)
   if type(value) ~= 'table' then
     -- return failure, value not table.
@@ -233,26 +244,26 @@ function Dots.AssertionsObject:_shape(value, control, message)
   local res = self:___recursiveShape(value, control)
   local status = true
   if #res > 0 then status = false end
-  table.insert(self.results, Assertion("_shape_assertion", status, message))
+  table.insert(self.results, Assertion("_shape_assertion", status, message, res))
   return nil
 end
-  -- only called by shape, checks a table to make sure that it matches, recursively.
-  -- checking shape assumes that a table value is being checked, and that we
-  -- only check the types and presence of keys and values.
-  --
+
+-- only called by shape, checks a table to make sure that it matches, recursively.
+-- checking shape assumes that a table value is being checked, and that we
+-- only check the types and presence of keys and values.
 function Dots.AssertionsObject:___recursiveShape(value, control)
   local res = {}
-  for k,v in ipairs(control) do
+  for k,v in pairs(control) do
     if value[k] == nil then
       table.insert(res, "Missing key: " .. tostring(k))
     end
     local tv = type(value[k])
-    if tv ~= v then
-      table.insert(res, "Index: "..tostring(k).." is "..tv..", expected: "..v)
+    if tv ~= v and type(v) ~= 'table' then
+      table.insert(res, "Index ["..tostring(k).."] is type("..tv..") expected: type("..type(v)..")")
     end
-    if v == 'table' then
-      local rs = ___recursiveShape(value[k],control["___"..tostring(k)])
-      if #rs > 0 then table.insert(res,rs) end
+    if type(v) == 'table' then
+      local rs = self:___recursiveShape(value[k],control[k])
+      if #rs > 0 then table.insert(res, rs) end
     end
   end
   return res
