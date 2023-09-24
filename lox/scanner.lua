@@ -2,7 +2,6 @@
 -- Is the scanner for the thing.
 require('lox/token_type')
 require('lox/token')
-print("Scanner loaded")
 
 Scanner = {
 
@@ -34,9 +33,8 @@ Scanner = {
 }
 
 function Scanner:new(source)
-	local src = source
   local u = {
-	  source=src,
+	  source=source,
 	  tokens={},
 	  start=1,
 	  current=1,
@@ -107,7 +105,6 @@ Scanner.scanTokenFunctions = {
   end,
   ["\""] = function (s) s:string() end,
 }
-
 
 
 local stf = Scanner.scanTokenFunctions

@@ -1,6 +1,5 @@
 -- Token
 -- Has a small structure for making tokens
-print("Token loaded")
 
 -- Creates a Token Object, which is just, like, a collection of some stuff.
 function Token (type, lexeme, literal, line)
