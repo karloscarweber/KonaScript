@@ -2,7 +2,7 @@ default:
 	lua main.lua
 
 test:
-	lua -i lox/test.lua
+	lua lox/test.lua
 
 generate:
 	lua lox/generateast_tool.lua
