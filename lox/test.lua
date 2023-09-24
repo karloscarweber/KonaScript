@@ -4,8 +4,7 @@ require 'dots'
 -- Setup Testing Context
 context = Dots:new()
 
-test_files = Dots.tests_in('lox/test')
-tasky = Dots.Task:new("Basic Test", test_files)
+tasky = Dots.Task:new("Basic Test", Dots.tests_in('lox/test'))
 context:add(tasky)
 
 context:execute()
