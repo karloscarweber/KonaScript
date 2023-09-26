@@ -161,8 +161,9 @@ function Scanner:string()
     self:advance()
   end
 
-  if self:isAtEnd() then
-    error("unterminated string.")
+  -- we only hit this error if we never get this string terminated.
+  if self:isAtEnd() and not (string.sub(self.source, self.current, self.current) == "\"") then
+    error("unterminated string. at line: " .. self.line)
     return
   end
 
@@ -185,9 +186,15 @@ function Scanner:peek()
 end
 
 function Scanner:peekNext()
-  local length = #self.source
-  if (self.current + 1 >= length) then return '\0' end
+  if (self.current + 1 >= #self.source) then return '\0' end
   return string.sub(self.source, (self.current + 1), (self.current + 1))
+end
+
+-- looks at the previous character
+function Scanner:peekBack()
+  -- short circuits to see if it's the end.
+  if (self.current == #self.source) then return '\0' end
+  return string.sub(self.source, (self.current), (self.current))
 end
 
 function Scanner:isAlpha(c)
