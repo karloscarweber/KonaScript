@@ -33,7 +33,6 @@ end)
 
 scanner_test:add("[test_scanner] Scanner:EndOfFile", function(r)
   local scanner = Scanner:new("hello hello hello hello ")
-  local tokens = scanner:scanTokens()
   r:_truthy(scanner, "Scanner Doesn't detect the end of file accurately.")
   return r
 end)
@@ -41,8 +40,6 @@ end)
 
 scanner_test:add("[test_scanner] Scanner:scanTokens", function(r)
   local scanner = Scanner:new("identifer = \"5\"")
-  local tokens = scanner:scanTokens()
-  print(tokens)
   r:_truthy(scanner, "Scanner is not initialized")
   return r
 end)
