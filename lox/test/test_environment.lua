@@ -24,7 +24,7 @@ environment_test:add("[test_environment] Environment:new()", function(r)
 end)
 
 
--- Test the shape of a new environment
+-- Test the definition and retrieval of variables.
 environment_test:add("[test_environment] Environment:define(), Environment:get()", function(r)
   local env = Environment:new()
 
@@ -44,5 +44,20 @@ environment_test:add("[test_environment] Environment:define(), Environment:get()
   r:_match(env:get(rank_token), "Captain", "Appropriate value not retrieved.")
   r:_match(env:get(assi_token), "Voyager", "Appropriate value not retrieved.")
 
+  return r
+end)
+
+-- Test the failure of getting a variable.
+environment_test:add("[test_environment] Environment:define(), Environment:get()", function(r)
+  local env = Environment:new()
+  local name_token = Token(IDENTIFIER, "name", "name", 0)
+
+  -- in order to test that an error was thrown and to get back
+  -- a status and error message for that error, it's necessary
+  -- to call your function inside of an anonymous function inside
+  -- of pcall:
+  local status, err = pcall(function () env:get(name_token) end)
+  local error_string = "Undefined Variable 'name'"
+  r:_truthy(string.match(err, error_string),"Unexpected Error String:\n" .. err .. "\n Expecting: "..error_string)
   return r
 end)
