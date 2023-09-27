@@ -86,18 +86,3 @@ ALL_TOKENS = {
 TokenType = ALL_TOKENS
 
 AT = ALL_TOKENS
--- tt = token_types
--- all_tokens = {}
-
--- function DeCat_Strings (strings)
---   for token in string.gmatch(strings, "[^%s]+") do
---     print(token)
---     all_tokens[token] = true
---   end
--- end
-
--- DeCat_Strings(tt.symbols)
--- DeCat_Strings(tt.smol)
--- DeCat_Strings(tt.literals)
--- DeCat_Strings(tt.keyword)
--- DeCat_Strings(tt.eof)
