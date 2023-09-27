@@ -22,7 +22,7 @@ end
 -- get the value stored at name in the lox environment
 function Environment:get(name)
   if self.values[name.lexeme] == nil then
-    error("Undefined Variable '" .. name.lexeme .. "'.")
+    error("Undefined Variable '" .. name.lexeme .. "'.", 2)
   else
     return self.values[name.lexeme]
   end
