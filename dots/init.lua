@@ -4,6 +4,7 @@
 require 'lox/helpers/dir'
 require 'lox/file_utility'
 require 'lox/helpers'
+color = require 'lib/color'
 
 Dots = {}
 
@@ -47,22 +48,39 @@ function Dots:execute()
   self:print_results()
 end
 
+-- just slow down
+function Dots.wait(milliseconds, str)
+  local start = os.clock()
+  local milli = milliseconds * 0.01
+  -- print("start: "..tostring(start))
+  repeat until os.clock() > start + milli
+  -- print("end:   "..tostring(start + milli))
+  io.write(str)
+  io.flush()
+end
+
 function Dots:print_results()
   local test_string, error_list, test_count = "Testing: ", {}, 0
 
-
   -- table.dump(self.results)
+  print("________________________________________________________________________________")
+
+  local sr = table.shuffle(self.results)
 
   -- Iterate over the Tests
-  for _,r in ipairs(self.results) do
-    for _,d in ipairs(r) do
+  for _,r in ipairs(sr) do
+    local rr = table.shuffle(r)
+    for _,d in ipairs(rr) do
       -- Go through the results in the tests now.
+
       for k,t in ipairs(d.results) do
         test_count = test_count + 1
         if t.pass == true then
-          test_string = test_string.."."
+          -- test_string = test_string.."."
+          Dots.wait(1, color.fg.green..".")
         else
-          test_string = test_string.."x"
+          -- test_string = test_string.."x"
+          Dots.wait(1, color.fg.red.."x")
           local errors_string = ""
           if t.errors ~= nil and type(t.errors) == 'table' then
             for k,v in ipairs(t.errors) do
@@ -70,18 +88,20 @@ function Dots:print_results()
             end
           end
 
-          table.insert(error_list, "Test Failed in: "..d.name.."\n".."["..t.name.."] "
-          ..t.message.."\n"..errors_string)
+          table.insert(error_list, color.fg.red.."Test Failed in: "..d.name.."\n".."["..t.name.."] "
+          ..t.message.."\n"..errors_string..color.reset)
         end
       end
+
     end
+    io.write(color.reset..'\n')
   end
 
   test_string = test_string .. "\n"
 
   -- Now that we have our results, print them.
-  print("________________________________________________________________________________")
-  print(test_string)
+
+  -- print(test_string)
   print(test_count.." Assertions, "..tostring(#error_list).." Failures.\n")
 
   if #error_list < 1 then

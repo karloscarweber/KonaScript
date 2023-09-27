@@ -79,3 +79,17 @@ function table.dump(tab, indent)
 		end
 	end
 end
+
+function table.shuffle(tableua)
+	-- indices to pick from
+	local tab = tableua
+	local shuffled = {}
+	-- pick indices from the list randomly
+	for i = 1, #tab do
+		local pick = math.random(1, #tab)
+		table.insert(shuffled, tab[pick])
+		table.remove(tab, pick)
+	end
+	-- tab = shuffled
+	return shuffled
+end
