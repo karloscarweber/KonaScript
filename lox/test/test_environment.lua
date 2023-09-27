@@ -23,7 +23,6 @@ environment_test:add("[test_environment] Environment:new()", function(r)
   return r
 end)
 
-
 -- Test the definition and retrieval of variables.
 environment_test:add("[test_environment] Environment:define(), Environment:get()", function(r)
   local env = Environment:new()

@@ -30,16 +30,17 @@ scanner_test:add("[test_scanner] Scanner:Advance, Scanner:isAtEnd", function(r)
   return r
 end)
 
-
+-- Test that the scanner can see the end of the file
 scanner_test:add("[test_scanner] Scanner:EndOfFile", function(r)
   local scanner = Scanner:new("hello hello hello hello ")
-  r:_truthy(scanner, "Scanner Doesn't detect the end of file accurately.")
+  r:_truthy(false, "Scanner Doesn't detect the end of file accurately.")
   return r
 end)
 
-
+-- Test that the scanner can see that we're at the end of a file
+-- even though the last character is a quotation mark.
 scanner_test:add("[test_scanner] Scanner:scanTokens", function(r)
   local scanner = Scanner:new("identifer = \"5\"")
-  r:_truthy(scanner, "Scanner is not initialized")
+  r:_truthy(false, "Scanner doesn't bug out when we scanTokens with a failed ending identifier.")
   return r
 end)
