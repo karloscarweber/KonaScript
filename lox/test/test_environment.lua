@@ -33,11 +33,16 @@ environment_test:add("[test_environment] Environment:define(), Environment:get()
   env:define("assignment", "Voyager")
 
   local name_token = Token(IDENTIFIER, "name", "name", 0)
-
+  local rank_token = Token(IDENTIFIER, "rank", "rank", 0)
+  local assi_token = Token(IDENTIFIER, "assignment", "assignment", 0)
 
   r:_truthy(env:get(name_token), "name assignment failed.")
-  -- r:_truthy(env.get('rank'), "rank assignment failed.")
-  -- r:_truthy(env.get('assignment'), "assignment assignment failed.")
+  r:_truthy(env:get(rank_token), "rank assignment failed.")
+  r:_truthy(env:get(assi_token), "assignment assignment failed.")
+
+  r:_match(env:get(name_token), "Kathryn", "Appropriate value not retrieved.")
+  r:_match(env:get(rank_token), "Captain", "Appropriate value not retrieved.")
+  r:_match(env:get(assi_token), "Voyager", "Appropriate value not retrieved.")
 
   return r
 end)
