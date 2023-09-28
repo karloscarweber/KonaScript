@@ -82,7 +82,7 @@ function Interpreter:visitUnaryExpr(expr)
 end
 
 function Interpreter:visitVariableExpr(expr)
-  return self.environment.get(expr.name)
+  return self.environment:get(expr.name)
 end
 
 function Interpreter:checkNumberOperand(operator, operand)

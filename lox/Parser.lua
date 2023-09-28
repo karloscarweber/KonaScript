@@ -38,14 +38,6 @@ end
 -- Accepts nothing, but spits out an array of statements.
 --
 function Parser:parse()
-	-- pcall, returns true, and nothing if there is no error
-	-- otherwise it returns false, and an error.
-	-- local status, err = pcall(foo)
-	-- if status then
-	-- 	return
-	-- else
-	-- 	return nil
-	-- end
 	local statements = {}
 	while not self:isAtEnd() do
 		table.insert(statements, self:declaration())
@@ -63,33 +55,19 @@ function Parser:expression()
 end
 
 function Parser:declaration()
-	-- print("declaration ... " .. self:peek().lexeme)
-	local result = {}
-	if self:match(VAR) then
-		print("var Declaration")
-		return self:varDeclaration()
+	local ok, err_result = pcall(function()
+		if self:match(VAR) then
+			return self:varDeclaration()
+		end
+	end)
+
+	if ok then
+		return err_result
 	else
-		print("Did not match a var for some reason.")
+		-- catch block
 		self:synchronize(nil, nil)
 		return nil
 	end
-	-- if (pcall(
-	-- function()
-	-- 	if self:match(VAR) then
-	-- 		print("var Declaration")
-	-- 		return self:varDeclaration()
-	-- 	end
-	-- 	print("var statement:")
-	-- 	result = self:statement()
-	-- 	return false
-	-- end
-	-- )) == true then
-	-- 	self:synchronize()
-	-- 	return nil
-	-- else
-	-- 	return result
-	-- end
-	print("reach end.")
 end
 
 function Parser:statement()
@@ -105,7 +83,7 @@ end
 
 function Parser:varDeclaration()
 	local name = self:consume(IDENTIFIER, "Expect variable name.")
-	print("consumed something")
+
 	local initializer = nil
 	if self:match(Equal) then
 		initializer = self:expression()
