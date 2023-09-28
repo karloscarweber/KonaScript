@@ -7,8 +7,8 @@ Scanner = {
 
   source="hello friends (){},;",
   tokens={},
-  start=1,
-  current=1,
+  start=0,
+  current=0,
   line=1,
 
   keywords = {
@@ -36,8 +36,8 @@ function Scanner:new(source)
   local u = {
 	  source=source,
 	  tokens={},
-	  start=1,
-	  current=1,
+	  start=0,
+	  current=0,
 	  line=1,
   }
   -- for k, v in ipairs(Scanner) do u[k] = v end
@@ -51,6 +51,7 @@ function Scanner:scanTokens()
   while self:isAtEnd() == false  do
     -- We are at the beginning of the next lexeme
     self.start = self.current
+    -- print("start and current:", self.start, self.current)
     self:scanToken()
   end
 
@@ -103,17 +104,23 @@ Scanner.scanTokenFunctions = {
   ["\n"] = function (s)
     s.line = s.line + 1
   end,
-  ["\""] = function (s) s:string() end,
+  ['"'] = function (s)
+    s:string()
+  end,
 }
 
-
-local stf = Scanner.scanTokenFunctions
-local stfmt = {}
-
+-- OK, so ScanTokenFunctions is like a switch statement of
+-- possible token values with the functions to handle them.
+-- we set a local variable of stf to represent the Scanner.
+-- scanTokenFunctions table. Then we give it a supertable
+-- index. Elsewhere, we set the super table of
+-- scanTokenFunctions to be Scanner itself. This let's us
+-- do the lookup ofr possible keys/indexes/options of the
+-- scanTokenFunctions table, then call the corresponding
+-- handler in the supertable, in this case, Scanner.
+local stf, stfmt = Scanner.scanTokenFunctions, {}
 stf.supertable = {}
-
-stf.mt = stfmt
-setmetatable(stf, stf.mt)
+setmetatable(stf, stfmt)
 stfmt.__index = function (table, key)
   if table.supertable:isDigit(key) then
     table.supertable:number()
@@ -155,14 +162,18 @@ function Scanner:number()
 
 end
 
+-- When we encounter the beginning of a string, that's a
+-- quotation mark ["], then we repeat this function.
 function Scanner:string()
+  -- Once we hit this function, we're still at the ["] in the source, we need to advance to actually capture the string
+  self:advance()
   while (self:peek() ~= '"' and not self:isAtEnd() ) do
-    if (self:peek() == '\n') then self.line = self.line + 1 end
+    if self:peek() == '\n' then self.line = self.line + 1 end
     self:advance()
   end
 
   -- we only hit this error if we never get this string terminated.
-  if self:isAtEnd() and not (string.sub(self.source, self.current, self.current) == "\"") then
+  if self:isAtEnd() then
     error("unterminated string. at line: " .. self.line)
     return
   end
@@ -217,7 +228,7 @@ end
 
 function Scanner:advance()
   self.current = self.current + 1
-  return string.sub(self.source, (self.current), (self.current))
+  return string.sub(self.source, self.current, self.current)
 end
 
 function Scanner:addToken(type, literal)
