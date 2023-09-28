@@ -59,17 +59,19 @@ end
 -- functions that parse the syntax tree and return Raw Lua code
 
 function Parser:expression()
-	return self:equality()
+	return self:assignment()
 end
 
 function Parser:declaration()
-	print("declaration ... " .. self:peek().lexeme)
+	-- print("declaration ... " .. self:peek().lexeme)
 	local result = {}
 	if self:match(VAR) then
 		print("var Declaration")
 		return self:varDeclaration()
 	else
 		print("Did not match a var for some reason.")
+		self:synchronize(nil, nil)
+		return nil
 	end
 	-- if (pcall(
 	-- function()

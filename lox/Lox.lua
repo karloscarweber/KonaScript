@@ -58,7 +58,6 @@ function Lox:runPrompt()
 	  input=io.read() -- reads the input, or recieves it on enter.
 		print("reading the buffer")
 		if not (input == "exit") then
-			-- load(input)
 			Lox.run(input)
 			Lox.hadError = false
 		end
@@ -81,13 +80,7 @@ function Lox.run(source)
 
 	if Lox.hadError then return end
 
-	lox.interpreter:interpret(statements)
-
-	-- print(AstPrinter().print(expression))
-
-	-- for _, token in ipairs(tokens) do
-	-- 	io.write(token.toString .. "\n")
-	-- end
+	Lox.interpreter:interpret(statements)
 end
 
 function Lox.error(line, message)

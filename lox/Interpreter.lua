@@ -1,29 +1,30 @@
 -- lox/Interpreter.lua
 require 'lox/Environment'
 
+
 Interpreter = {}
 
 -- create a new parser by calling Interpreter:new()
 function Interpreter:new()
-  local t = {
-    environment = LoxEnvironment()
-  }
+  local t = { environment = Environment:new() }
   setmetatable(t,self)
   self.__index = self
   return t
 end
 
 function Interpreter:inty(statements)
-  for stmt in statements do
-    self:execute(stmt)
-  end
   local value = self:evaluate(expressions)
   print(tostring(value))
 end
 
 function Interpreter:interpret(statements)
-  if (pcall(self:inty(statements))) == true then
-    print("This broke")
+  local ok, err = pcall(function()
+    for _,statement in ipairs(statements) do
+      self:execute(statement)
+    end
+  end)
+  if ok ~= true then
+    Lox.runtimeError(err)
   end
 end
 
@@ -33,14 +34,14 @@ function Interpreter:visitLiteralExpr(expr)
 end
 
 function Interpreter:visitGroupingExpr(expr)
-  return evaluate(expr.expression)
+  return self:evaluate(expr.expression)
 end
 
 function Interpreter:evaluate(expr)
   return expr.accept(self)
 end
 
-function execute(stmt)
+function Interpreter:execute(stmt)
   stmt.accept(self)
 end
 
@@ -82,10 +83,6 @@ end
 
 function Interpreter:visitVariableExpr(expr)
   return self.environment.get(expr.name)
-end
-
-function Interpreter:visitVariableExpr(expr)
-  return self.environment:get(expr.name)
 end
 
 function Interpreter:checkNumberOperand(operator, operand)

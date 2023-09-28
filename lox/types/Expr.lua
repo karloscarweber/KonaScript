@@ -1,6 +1,17 @@
 -- lox/types/Expr.lua
 
 Expr = {
+	["Assign"] = function (name,value)
+		local t = {}
+		t.__typeName = "Assign"
+		t.name = name
+		t.value = value
+		t.accept = function(visitor)
+			return visitor.visitAssignExpr(t)
+		end
+		return t
+	end,
+
 	["Binary"] = function (left,operator,right)
 		local t = {}
 		t.__typeName = "Binary"
