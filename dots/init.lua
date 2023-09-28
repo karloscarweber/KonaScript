@@ -62,9 +62,6 @@ end
 function Dots:print_results()
   local test_string, error_list, test_count = "Testing: ", {}, 0
 
-  -- table.dump(self.results)
-  print("________________________________________________________________________________")
-
   local sr = table.shuffle(self.results)
 
   -- Iterate over the Tests
