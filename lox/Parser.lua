@@ -54,18 +54,18 @@ function Parser:expression()
 	return self:assignment()
 end
 
+-- returns a Stmt
 function Parser:declaration()
 	local ok, err_result = pcall(function()
 		if self:match(VAR) then
 			return self:varDeclaration()
 		end
+		return statement()
 	end)
 
-	if ok then
-		return err_result
-	else
-		-- catch block
-		self:synchronize(nil, nil)
+	-- If ok is true, then all is good.
+	if not ok then
+		self:synchronize()
 		return nil
 	end
 end
@@ -85,7 +85,7 @@ function Parser:varDeclaration()
 	local name = self:consume(IDENTIFIER, "Expect variable name.")
 
 	local initializer = nil
-	if self:match(Equal) then
+	if self:match(EQUAL) then
 		initializer = self:expression()
 	end
 
@@ -179,7 +179,8 @@ function Parser:primary()
 end
 
 function Parser:match(...)
-	print "match: ..."
+	local inf = debug.getinfo(2)
+	print(inf.name, inf.currentline, inf.source, inf.currentline)
 	local types = {...}
 	for _,type in ipairs(types) do
 		if self:check(type) then
@@ -196,6 +197,10 @@ function Parser:consume(type, message)
 	self:error(self:peek(), message)
 end
 
+-- Parser:check()
+-- accepts a token type, not an actual token, and peeks to see if it's
+-- the next token.
+-- (@type:TokenType)
 function Parser:check(type)
 	if self:isAtEnd() then return false end
 	return (self:peek().type == type)
