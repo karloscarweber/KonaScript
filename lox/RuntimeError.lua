@@ -15,3 +15,6 @@ RuntimeError = function (token, message)
   })
   return t
 end
+
+Error = {}
+Error.Runtime()
