@@ -7,6 +7,8 @@
 #include "debug.h"
 #include "vm.h"
 #include "value.h"
+#include "scanner.h"
+#include "compiler.h"
 
 static void repl() {
   char line[1024];

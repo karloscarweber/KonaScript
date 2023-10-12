@@ -4,13 +4,20 @@
 #include "common.h"
 #include "scanner.h"
 
-tyepdef struct {
+typedef struct {
   const char* start;
   const char* current;
   int line;
-} Scanner
+} Scanner;
 
 Scanner scanner;
+
+// forward declarations
+static char peek();
+static bool isDigit(char c);
+static char advance();
+static Token makeToken(TokenType type);
+static TokenType identifierType();
 
 void initScanner(const char* source) {
   scanner.start = source;
@@ -24,7 +31,7 @@ bool isAlpha(char c) {
          c == '_';
 }
 
-static token identifier() {
+static Token identifier() {
   while (isAlpha(peek()) || isDigit(peek())) advance();
   return makeToken(identifierType());
 }
@@ -46,7 +53,7 @@ static char peek() {
   return *scanner.current;
 }
 
-static peekNext() {
+static char peekNext() {
   if (isAtEnd()) return '\0';
   return scanner.current[1];
 }
@@ -145,7 +152,7 @@ static TokenType identifierType() {
   return TOKEN_IDENTIFIER;
 }
 
-static token number() {
+static Token number() {
   while (isDigit(peek())) advance();
 
   // Look for a fractional part.
@@ -186,7 +193,7 @@ Token scanToken() {
     case '(': return makeToken(TOKEN_LEFT_PAREN);
     case ')': return makeToken(TOKEN_RIGHT_PAREN);
     case '{': return makeToken(TOKEN_LEFT_BRACE);
-    case '}': return makeToken(TOKEN_RIRGHT_BRACE);
+    case '}': return makeToken(TOKEN_RIGHT_BRACE);
     case ';': return makeToken(TOKEN_SEMICOLON);
     case ',': return makeToken(TOKEN_COMMA);
     case '.': return makeToken(TOKEN_DOT);
@@ -195,13 +202,17 @@ Token scanToken() {
     case '/': return makeToken(TOKEN_SLASH);
     case '*': return makeToken(TOKEN_STAR);
     case '!':
-      match('=') ? TOKEN_BANG_EQUAL : TOKEN_BANG;
+      return makeToken(
+        match('=') ? TOKEN_BANG_EQUAL : TOKEN_BANG);
     case '=':
-      match('=') ? TOKEN_EQUAL_EQUAL : TOKEN_EQUAL;
+      return makeToken(
+        match('=') ? TOKEN_EQUAL_EQUAL : TOKEN_EQUAL);
     case '<':
-      match('=') ? TOKEN_LESS_EQUAL : TOKEN_LESS;
+      return makeToken(
+        match('=') ? TOKEN_LESS_EQUAL : TOKEN_LESS);
     case '>':
-      match('=') ? TOKEN_GREATER_EQUAL : TOKEN_GREATER;
+      return makeToken(
+        match('=') ? TOKEN_GREATER_EQUAL : TOKEN_GREATER);
     case '"': return string();
   }
 
