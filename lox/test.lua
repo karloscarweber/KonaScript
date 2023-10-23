@@ -1,4 +1,7 @@
 -- lox/test.lua
+
+-- patch the package loading paths to get our libs.
+package.path = "./?/init.lua;"..package.path
 require 'dots'
 
 -- Setup Testing Context
@@ -14,15 +17,3 @@ context:execute()
 -- Add green dots for successful tests.
 
 -- print the logged errors at the end.
-
-
--- Run Tests
--- tests = {}
--- Test = {}
--- function Test:new(summary, funk)
---   local t = {
---     summary = summary,
---     funk = funk,
---   }
---   return t
--- end

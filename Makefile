@@ -7,7 +7,7 @@ olddefault:
 	lua main.lua
 
 test:
-	lua lox/test.lua
+	luajit lox/test.lua
 
 generate:
 	lua lox/generateast_tool.lua

@@ -1,6 +1,6 @@
 # Syntax
 
-An attempt at documenting the syntax
+An attempt at documenting the syntax of the language I'm working on.
 
 ## Variables
 You can declare variables with the `=` operator.
@@ -18,39 +18,47 @@ We can do math:
 
 There are several primitive types:
 ```stim
-nil # Represents a nil value.
-anInteger = 99
-aFloat = 19.99
-aString = "Hi I'm a string"
-ASymbol = :fantastic
-aHash = {fantastic=:fantastic, "garbled"= nil,}
-aFunction = function () end
-aHash.myFunction = aFunction
+nil -- Represents a nil value.
+anInteger = 99 -- an int value
+aFloat = 19.99 -- a float
+aString = "Hi I'm a string" -- a string
+ASymbol = :fantastic -- a symbol, which is just a string, but converted to the memory address of the name, every symbol shares the same address.
+aHash = {fantastic: fantastic, "garbled key": nil, age: 99, address: {addr1: "999 overflow dr", addr2:"Salt Lake City UT"}} -- Hashes are multi dimensional arrays.
+aFunction = def  end -- a function declaration, does nothng.
+aHash.myFunction = aFunction.handle -- you can store functions into hashes.
 ```
 
-Hashes are like Dictionaries and Arrays at the same time. Each value is added in sequence and their sequence is guaranteed. Omitting a key for a value just means that the value can only be referenced by their place in the sequence.
+Hashes are like Dictionaries and Arrays at the same time. Omitting a key for a value just means that the value can only be referenced by their place in the sequence. In fact, just like Lua, there is a hash array, and an array array, reference by a number.
 ```stim
 list = {"cheese", "crackers",numskull="whatever"}
 list.count
-> 3
+> 2
 list.0
-> "cheese"
+> cheese
 list.crackers
 > nil
 list.numskull
-> "whatever"
+> whatever
 ```
+
+The `.` character is the index operator. It tries to find the following index in the preceding object/value. So `myObject.value` is the same as `myObject["value"]`.
 
 Assigning a value to an empty key in a hash will make that key:
 ```stim
 friends = {}
 friends.best = "Collin"
+friends.indexes.count
+> 1
+friends.best
+> Collin
 ```
 
 You can add values directly to a list using the shovel:
 ```stim
 list = {"_why", "Matz", "Marco"}
-list << "Amazing"
+list << "Joel"
+list.count
+> 4
 ```
 
 The shovel can also be used to concatenate strings:
@@ -59,11 +67,19 @@ cheeses = "Cheddar"
 cheeses << ", Gouda" << ", Provologne"
 ```
 
-Functions are first class value object thingies. They can be created, assigned, passed around, invoked, and disappeared by setting them to nil. The act as closures, and enclose their surrounding environment when referencing values from outside of them. They are nice. parenthesis are optional
+Functions are first class value object thingies. They can be created, assigned, passed around, invoked, and disappeared by setting them to nil. They act as closures, and enclose their surrounding environment when referencing values from outside of them. They are nice. parenthesis are optional when invoking functions.
 ```stim
-def funky(name) print name end
+def funky(name)
+	print name
+end
 funky "karl"
 > karl
+funky("karl")
+> karl
+funky
+>
+funky.handle
+> <function 1904883>
 ```
 
 You can store a reference to the function by grabbing it's handle:
@@ -71,13 +87,17 @@ You can store a reference to the function by grabbing it's handle:
 fresh = funky.handle
 ```
 
+If you reference a function, and it's not immediately followed by a `.handle` declaration then it's assumed that your calling it. so
+
 Now calling the function requires an explicit call:
 ```stim
 fresh.call()
 fresh.()
 ```
 
-In this way we maintain expressive DSL like syntax, with First Class Function citizens.
+Adding the function
+
+In this way we maintain expressive DSL like syntax, with First Class Function citizens. The `def` syntax is then syntactic sugar
 
 Everything is also an Object, So you can do this:
 ```stim
@@ -89,22 +109,37 @@ function_hash.0 "dude"
 > "dude"
 ```
 
+## Reserved words
+and      break    case     continue class
+def      do       else     elseif   end
+enum
+false    for      function if       in
+local    module   nil      not      or
+repeat   return   switch   then     true
+until    unless   when     while
 
+## Other Tokens
++     -     *     /     %     ^     #
+&     &&    @     =     ||    <<    !
+==    !=    <=    >=    <     >
+(     )     {     }     [     ]
+;     :     ,     .
 
+## idioms
+||=     ::=   Memoize Operator, expands to an assignment to the lefthand Name if
+							it is nil by adding `if Name == nil` to the end of the statement
+							and replacing `||=` with `=`. Pretty simple one.
 
 # An Attempt at Extended BNF description
 
-{A} means 0 or more As, [A] means an opional A.
-
+{A} means 0 or more As, [A] means an optional A.
 
 block   ::=   {stat} [retstat]
 
 stat    ::=   `;` |
               varlist `=` explist |
               functioncall |
-              label |
               break |
-              goto Name |
               do block end |
               while exp do block end |
               repeat block until exp |
@@ -139,25 +174,25 @@ functioncall ::= prefixexp args | refixexp `:` Name args
 
 args ::= `(` [explist] `)` | tableconstructor | LiteralString
 
-functiondef ::= function funcbody
+functiondef ::= function funcbody | def funcbody
 
 funcbody ::= `(` [parlist] `)` block end
 
-parlist ::= namelist [`,` `...`] | `...`
+parlist ::= namelist [`,` `*`] | `*`
 
 tableconstructor ::= `{` [fieldlist] `}`
 
 fieldlist ::= field {fieldsep field} [fieldsep]
 
-field ::= `[` exp `]` `=` exp | Name `=` exp | exp
+field ::= `[` exp `]` `:` exp | Name `:` exp | exp | Name `:`
 
 fieldsep ::= `,` | `;`
 
 binop ::= `+` | `-` | `*` | `/` | `//` | `^` | `%` | `&` |
-          `~` | `|` | `>>` | `<<` | `..` | `<` | `<=` |
-          `>` | `>=` | `==` | `~=` | and | or
+          `~` | `|` | `>>` | `<<` | `.` | `<` | `<=` |
+          `>` | `>=` | `==` | `~=` | and | or | `<<` | `&&`
 
-unop ::= `-` | not | `#` | `~`
+unop ::= `-` | not | `#` | `!` | `&`
 
 
 block means a block of code
