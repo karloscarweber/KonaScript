@@ -21,10 +21,9 @@ function Kona:main(...)
   end
 end
 
-
--- Runs a comand prompt that loops and accepts program input.
+-- Runs a command prompt that loops and accepts program input.
 function Kona:runPrompt()
-  io.write("start Kona Prompt:\n") -- io.write, writes that thing
+  io.write("start Kona Prompt:") -- io.write, writes that thing
   io.flush()
   repeat
     io.write("> ") -- io.write, writes that thing to the buffer

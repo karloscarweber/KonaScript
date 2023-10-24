@@ -23,9 +23,8 @@ prebuild:
 
 
 kona:
-	luajit -b kona/kona.lua kona/interpreter.obj
 	cd kona; luajit concatenater.lua
-	clang -o kona/kona kona/kona.c LuaJit/src/libluajit.so kona/interpreter.obj
+	clang -o kona/kona kona/kona.c LuaJit/src/libluajit.so
 
 konaclean:
 	rm kona/kona;
