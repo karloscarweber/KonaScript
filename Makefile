@@ -21,8 +21,11 @@ printer:
 prebuild:
 	cd LuaJIT; make;
 
+
 kona:
-	clang -o kona/kona kona/kona.c LuaJit/src/libluajit.so
+	luajit -b kona/kona.lua kona/interpreter.obj
+	cd kona; luajit concatenater.lua
+	clang -o kona/kona kona/kona.c LuaJit/src/libluajit.so kona/interpreter.obj
 
 konaclean:
 	rm kona/kona;
