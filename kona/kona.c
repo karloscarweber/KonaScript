@@ -4,12 +4,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-// linking to LuaJit here
-// linking to precompiled Lua here
-//
+// linking to LuaJIT here
+#include "../luajit/src/lua.h"
+#include "../luajit/src/lauxlib.h"
+#include "../luajit/src/lualib.h"
+#include "../luajit/src/luajit.h"
 
 int main() {
-    printf("Hello World");
+  printf("Hello World\n");
 
   // setup state
   // parse inputs
@@ -21,4 +23,7 @@ int main() {
   // start
 
   // return a good error code or something
+
+  exit(64);
+  return 0;
 }

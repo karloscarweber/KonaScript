@@ -22,7 +22,7 @@ prebuild:
 	cd LuaJIT; make;
 
 kona:
-	cd kona; clang -o kona kona.c
+	clang -o kona/kona kona/kona.c LuaJit/src/libluajit.so
 
 konaclean:
 	rm kona/kona;
