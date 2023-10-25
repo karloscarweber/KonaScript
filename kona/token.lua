@@ -2,38 +2,34 @@
 -- Token and Token Type
 -- Has a small structure for making tokens
 
-local ffi = require("ffi")
+-- local ffi = require("ffi")
 
 -- Creates a Token Object, which is just, like, a collection of some stuff.
 function Token (type, lexeme, literal, line)
-  local t = {}
-  t.type = type
-  t.lexeme = lexeme
-  t.literal = literal
-  t.line = line
   if literal == nil then literal = 'nil' end
-  -- t.toString = "" .. type .. " => [" .. lexeme .. "] " .. literal
-  -- t.description = "(line:" .. line .. ") - " .. type .. "  " .. lexeme .. " " .. literal
+  local t = {
+    type = type,
+    lexeme = lexeme,
+    literal = literal,
+    line = line,
+  }
   return t
 end
 
--- create a new C data structure that we have access to called Token.
-ffi.cdef[[
-typedef struct {
-  uint8_t type;
-  uint8_t line;
-  char *lexeme;
-  char *literal;
-} token;
-]]
-
--- Initializer for Token Object
-function Token(type, lexeme, literal, line)
-  return ffi.new("token", n)
+-- transforms a token to a string
+function Token_toString(t)
+  return "" .. ALL_TOKENS[t.type] .. " =>  " .. t.lexeme .. "  `" .. t.literal .. "`"
 end
 
+-- gets a description of a token
+function Token_description(t)
+  return "(line:" .. t.line .. ") - " .. ALL_TOKENS[t.type] .. "  " .. t.lexeme .. " `" .. t.literal .. "`"
+end
 
 -- Token Types
+-- Token Types include special characters, and reserved words.
+-- They are global here because we need to access them
+-- in a lot of spots, will probably name space these later.
 LEFT_PAREN = 0
 RIGHT_PAREN = 1
 LEFT_BRACE = 2
@@ -74,49 +70,72 @@ VAR = 36
 WHILE = 37
 EOF = 38
 
--- this is unused
-ALL_TOKENS = {
-RIGHT_PAREN,
-LEFT_BRACE,
-RIGHT_BRACE,
-COMMA,
-DOT,
-MINUS,
-PLUS,
-SEMICOLON,
-SLASH,
-STAR,
-BANG,
-BANG_EQUAL,
-EQUAL,
-EQUAL_EQUAL,
-GREATER,
-GREATER_EQUAL,
-LESS,
-LESS_EQUAL,
-IDENTIFIER,
-STRING,
-NUMBER,
-AND,
-CLASS,
-ELSE,
-FALSE,
-FUN,
-FOR,
-IF,
-NIL,
-OR,
-PRINT,
-RETURN,
-SUPER,
-THIS,
-TRUE,
-VAR,
-WHILE,
-EOF,
-}
+-- ALL_TOKENS or AT gives us a lookup of the tokens
+-- as strings, useful for inspection purposes
+ALL_TOKENS = {}
+AT = ALL_TOKENS
+AT[LEFT_PAREN] = "LEFT_PAREN"
+AT[RIGHT_PAREN] = "RIGHT_PAREN"
+AT[LEFT_BRACE] = "LEFT_BRACE"
+AT[RIGHT_BRACE] = "RIGHT_BRACE"
+AT[COMMA] = "COMMA"
+AT[DOT] = "DOT"
+AT[MINUS] = "MINUS"
+AT[PLUS] = "PLUS"
+AT[SEMICOLON] = "SEMICOLON"
+AT[SLASH] = "SLASH"
+AT[STAR] = "STAR"
+AT[BANG] = "BANG"
+AT[BANG_EQUAL] = "BANG_EQUAL"
+AT[EQUAL] = "EQUAL"
+AT[EQUAL_EQUAL] = "EQUAL_EQUAL"
+AT[GREATER] = "GREATER"
+AT[GREATER_EQUAL] = "GREATER_EQUAL"
+AT[LESS] = "LESS"
+AT[LESS_EQUAL] = "LESS_EQUAL"
+AT[IDENTIFIER] = "IDENTIFIER"
+AT[STRING] = "STRING"
+AT[NUMBER] = "NUMBER"
+AT[AND] = "AND"
+AT[CLASS] = "CLASS"
+AT[ELSE] = "ELSE"
+AT[FALSE] = "FALSE"
+AT[FUN] = "FUN"
+AT[FOR] = "FOR"
+AT[IF] = "IF"
+AT[NIL] = "NIL"
+AT[OR] = "OR"
+AT[PRINT] = "PRINT"
+AT[RETURN] = "RETURN"
+AT[SUPER] = "SUPER"
+AT[THIS] = "THIS"
+AT[TRUE] = "TRUE"
+AT[VAR] = "VAR"
+AT[WHILE] = "WHILE"
+AT[EOF] = "EOF"
+
 
 -- this gets us a zero based array, which we want.
-ALL_TOKENS[0] = LEFT_PAREN
 
 TokenType = ALL_TOKENS
+
+-- Some Tests of the Token System.
+print("test that it works")
+-- print(RIGHT_PAREN)
+-- print(NUMBER)
+-- ALL_TOKENS[STRING] = "STRING"
+-- print(ALL_TOKENS[RIGHT_PAREN])
+-- print(ALL_TOKENS[NUMBER])
+
+t = Token(LEFT_PAREN, "(", "(", 1)
+print(Token_toString(t))
+print(Token_description(t))
+print("")
+d = Token(STRING, "Whatever Man.", "\"Whatever Man.\"", 1)
+print(Token_toString(d))
+print(Token_description(d))
+print("")
+e = Token(STRING, 15, 15, 1)
+print(Token_toString(e))
+print(Token_description(e))
+

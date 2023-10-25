@@ -7,52 +7,17 @@
 -- require('lox/token_type')
 -- require('lox/token')
 
-Scanner = {
-
-  keywords = {
-  ["and"]      = AND,
-  ["break"]    = BREAK,
-  ["case"]     = CASE,
-  ["continue"] = CONTINUE,
-  ["class"]    = CLASS,
-  ["def"]      = DEF,
-  ["do"]       = DO,
-  ["else"]     = ELSE,
-  ["elseif"]   = ELSEIF,
-  ["end"]      = END,
-  ["enum"]     = ENUM,
-  ["false"]    = FALSE,
-  ["for"]      = FOR,
-  ["function"] = FUNCTION,
-  ["if"]       = IF,
-  ["in"]       = IN,
-  ["module"]   = MODULE,
-  ["nil"]      = NIL,
-  ["not"]      = NOT,
-  ["or"]       = OR,
-  ["repeat"]   = REPEAT,
-  ["return"]   = RETURN,
-  ["struct"]   = STRUCT,
-  ["super"]    = SUPER,
-  ["switch"]   = SWITCH,
-  ["then"]     = THEN,
-  ["true"]     = TRUE,
-  ["until"]    = UNTIL,
-  ["unless"]   = UNLESS,
-  ["when"]     = WHEN,
-  ["while"]    = WHILE,
-  },
-
-}
+-- make namespace
+Scanner = {}
 
 -- creates a new Scanner object
 function Scanner:new(source)
   local u = {
-    source=source,
-    tokens={},
     start=0,
     current=0,
     line=1,
+    source=source,
+    tokens={},
   }
   setmetatable(u, self)
   self.__index = self
@@ -94,10 +59,8 @@ function Scanner:number()
 
     while (self:isDigit(self:peek())) do self:advance() end
   end
-  local so,s,c = self.source,self.start,self.current
 
-  self:addToken(NUMBER, tonumber(string.sub(so, s, c)))
-
+  self:addToken(NUMBER, tonumber(string.sub(self.source,self.start,self.current)))
 end
 
 -- When we encounter the beginning of a string, that's a
@@ -123,30 +86,36 @@ end
 
 function Scanner:match(expected)
   if (self:isAtEnd()) then return false end
-  if (string.sub(self.source, self.current, self.current) ~= expected) then return false end
+  if (self:get_current() ~= expected) then return false end
 
   self.current = self.current + 1;
   return true;
 end
 
-function Scanner:peek()
+-- gets the current character, with optional peek forward or backward
+function Scanner:get_current(step)
+  if not step then step = 0 end -- sets default value of step
+  return string.sub(self.source, (self.current+step), (self.current+step))
+end
+
+function Scanner:peek(step)
   if (self:isAtEnd()) then return '\0' end
-  return string.sub(self.source, self.current, self.current)
+  return self:get_current(0)
 end
 
 function Scanner:peekNext()
   if (self.current + 1 >= #self.source) then return '\0' end
-  return string.sub(self.source, (self.current + 1), (self.current + 1))
+  return self:get_current(1)
 end
 
 -- looks at the previous character
 function Scanner:peekBack()
   -- short circuits to see if it's the end.
   if (self.current == #self.source) then return '\0' end
-  return string.sub(self.source, (self.current), (self.current))
+  return self:get_current(-1)
 end
 
--- Check to see if we're
+-- Check to see if we're getting strings or digits.
   -- Finds out if the current token is alphanumeric.
   function Scanner:isAlpha(c)
     return (c >= 'a' and c <= 'z') or
@@ -170,7 +139,7 @@ end
 -- advances the scanner forward
 function Scanner:advance()
   self.current = self.current + 1
-  return string.sub(self.source, self.current, self.current)
+  return self:get_current()
 end
 
 -- adds a token.
@@ -254,3 +223,37 @@ stfmt.__index = function (table, key)
     error("Unexpected Character "..key..", at line "..table.supertable.line, 2)
   end
 end
+
+Scanner.keywords = {
+["and"]      = AND,
+["break"]    = BREAK,
+["case"]     = CASE,
+["continue"] = CONTINUE,
+["class"]    = CLASS,
+["def"]      = DEF,
+["do"]       = DO,
+["else"]     = ELSE,
+["elseif"]   = ELSEIF,
+["end"]      = END,
+["enum"]     = ENUM,
+["false"]    = FALSE,
+["for"]      = FOR,
+["function"] = FUNCTION,
+["if"]       = IF,
+["in"]       = IN,
+["module"]   = MODULE,
+["nil"]      = NIL,
+["not"]      = NOT,
+["or"]       = OR,
+["repeat"]   = REPEAT,
+["return"]   = RETURN,
+["struct"]   = STRUCT,
+["super"]    = SUPER,
+["switch"]   = SWITCH,
+["then"]     = THEN,
+["true"]     = TRUE,
+["until"]    = UNTIL,
+["unless"]   = UNLESS,
+["when"]     = WHEN,
+["while"]    = WHILE,
+}
