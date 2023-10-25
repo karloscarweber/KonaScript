@@ -1,21 +1,20 @@
 # Kona
-
-Kona (or Konascript), is an attempt to write a small programming language to make User Interfaces for websites easier and more manageable.
+Kona (or Konascript), is a small programming language for the web.
 
 ## Domains?:
 * kona.sh
-* konalang.org (redirects to kona.sh)
+* kona-lang.org (redirects to kona.sh)
 * konascript.org (redirects to kona.sh)
 
 ### Brew name?:
 * kna?
 * brew install konascript
 ### file name:
-* kan
-* install.kan
+* kna
+* install.kna
 
 ## Why?
-Javascript is not the best. It's getting better, but ya know what... we could do better. I want a language that supports an expressive syntax to construct and manipulate Nested UI. One that is purpose built for the needs of the web and it's interface, and one that responds to and makes UI responsive and interactive.
+Javascript is not the best. It's getting better, but ya know what... we could do better. I want a language that supports an expressive syntax to construct and manipulate Nested UI, in HTML. One that is purpose built for the needs of the web and it's interface, and one that responds to and makes UI responsive and interactive.
 
 Purpose built for the web.
 
@@ -23,11 +22,11 @@ Composability is also a goal. Templating that works and looks like it belongs in
 
 Animation: Expressive syntax to manipulate values over time, to broadcast the change of those values, and to provide in language facilities to ease from one value to another.
 
-Buildable, Objects broadcast their initialization to their containing block and are can natively receive and bubble up event changes. Facilities for building view hierarchies that are pretty great, If I do say so myself. This requires a system to keep track of parent/child relationships. Probably reserving some variables to track these element would make sense.
+Buildable, Objects broadcast their initialization to their containing block and receive and bubble up event changes. Facilities for building view hierarchies. This requires a system to keep track of parent/child relationships. Probably reserving some variables to track these element would make sense.
 
 ```ruby
 class Element
-  def initialize(name)
+  def init(name)
     @name = name
   end
 end
@@ -42,8 +41,8 @@ element.children
 
 DOM ready, an expressive API for querying, modifying, and monitoring the DOM. Responds to DOM changes by removing or adding corresponding DOM elements in code.
 
-template able: Expressive syntax for creating, composing, and rendering xml based template systems, like Svg and Html.
-```kona
+template able: Expressive syntax for creating, composing, and rendering xml based template systems, like SVG and HTML.
+```ruby
 	class NameTag < Element
 
 		# You can write html directly into a Kona file. The template is stored as a special
@@ -56,8 +55,8 @@ template able: Expressive syntax for creating, composing, and rendering xml base
 	end
 ```
 
-The template syntax above is syntactic sugar for:
-```kona
+The template syntax above is syntactic sugar for something like this:
+```ruby
 	ButtonList = Class.inheritFrom(Element)
 	ButtonList.template = Template("nameTag", [[<nameTag name="jimbo" data-controller="another attribute">
 		<p>My Name</p>
@@ -65,7 +64,7 @@ The template syntax above is syntactic sugar for:
 ```
 
 The `Template` class is important in this instance. By convention, the name of the template tag matches the containing object's name. But this doesn't have to be the case. giving the template an explicit assignment to local variable is also possible.
-```kona
+```ruby
 	template_name = <nameTag name="jimbo" data-controller="another attribute">
 			<p>My Name</p>
 	</nameTag>
@@ -73,7 +72,7 @@ The `Template` class is important in this instance. By convention, the name of t
 
 Objects can also be constructed almost instantly from valid JSON. Although always sanitize your inputs:
 ```json
-{
+obj = {
 	"person": {
 		"name": "Jim Kirk",
 		"address": {
@@ -86,9 +85,11 @@ Objects can also be constructed almost instantly from valid JSON. Although alway
 		"phone": "555-992-5050"
 	}
 }
+obj.type
+# > <Object: 0x600002a58160> {
 ```
 
-valid string identifiers can omit enclosing quotes:
+Valid string identifiers can omit enclosing quotes, but this wouldn't be valid json:
 
 ```json
 {
@@ -114,7 +115,6 @@ Eventable, Ability to attach lifecycle callbacks to any object or element, along
 ```ruby
 class Element
   # ... element code
-
   when :someEventHappened do |event|
     # Do something in the context of this class with the event.
   end
@@ -128,7 +128,7 @@ class Element
   def somethingCool
     # Do something cool
 
-    broadcast(:someOtherEvent)
+    broadcast :someOtherEvent
     # Broadcast a generic event here, named someOtherEvent.
     # The Event is broadcast from the global context and then filters down through the
     # The children chain
@@ -143,15 +143,47 @@ class Element
 end
 ```
 
+Broadcast always broadcasts downward and bubble always broadcasts upwards. Separating the parent/child reception of this activity gives us some interesting opportunities. Brodcasting to a whole application could be achieved through a root object:
+
+```ruby
+window.broadcast :somethingNew
+```
+
 Bindable: An extension of events, and similar to how publishers and observers work in SwiftUI, we should have a system to Instantiate objects that observer the change of values in other objects and receive updates on these changes. This should also be something that builders tap in to so that they can re-run subsystems that rely on the built state of certain objects.
 
-```lua
--- set up a cabinet storage spot
-cabinet = {cheese="Gouda"}
+```ruby
+# set up a cabinet storage spot
+cabinet = {cheese: "Gouda"}
 
--- make a plate, but pass a binding variable to it.
-local cheese_binding = $cabinet.cheese
-plate = Plate:new(cheese_binding)
+# make a plate, but pass a binding variable to it.
+plate = Plate.new($cabinet.cheese)
+
+# This then creates a callback in cabinet for whenever cheese changes, or cabinet dies.
+# as the binding is passed to Plate, it could be used, or not. if a reference to the binding
+# is saved somewhere in the context of Plate, then an event listener is created in Plate:
+
+class Plate
+	def init(cheese)
+		# cheese is implicitly checked to see if it's a binding
+		# if it is then a the value is saved and change callbacks
+		# are created on self.
+		@cheese = cheese
+	end
+end
+
+# what the implicit binding looks like:
+plate.when :cheese_changed do |event|
+	# we're adding this event listener directly to the
+end
+# because cheese is a binding, not the value, we can add a subscriber,
+# in this case, it's plate that is subscribing
+cheese.add_subscriber(plate, for_event: :cheese_changed)
+
+#for event is implied to be the proxys name, but when this is set is important.
+# When you create a binding at a call site: Plate.new($cabinet.cheese), The binding/proxy
+# object is made in that context, not in the init block that is subsequently called.
+# by the time cheese reaches that block, it's already a proxy renamed to be a local variable
+# in that block
 ```
 
 I'm not sure how this one will work exactly though. It will need to be a fundamental thing in the language to allow redefining a variable and propagating that value downward in an efficient and easy way.
@@ -197,7 +229,7 @@ local cheese_binding = make_or_get_proxy(cabinet.cheese)
 plate = Plate:new(cheese_binding)
 ```
 
-oh crap, this won't work. When you're tryin got index a value: `container.value_youre_indexing`, you're looking for that key in the object. In order to properly proxy and propagate a value's changes, you'll need to add a proxy to the containing object: `container` in this case. and that proxy will then grab the value for a value table, or pass along changes. Quite a bit of state will need to be set up in that instance.
+oh crap, this won't work. When you're tryin to index a value: `container.value_youre_indexing`, you're looking for that key in the object. In order to properly proxy and propagate a value's changes, you'll need to add a proxy to the containing object: `container` in this case. and that proxy will then grab the value for a value table, or pass along changes. Quite a bit of state will need to be set up in that instance.
 
 So for this to work every object will need to have a metatable with `__index` and `__new_index` set up to look up the values that are just values, and return the proxies value for those that are not values. this is because we want to prevent direct assignments or reassignments of the proxied value, which could erase the proxy. I think we'll solve that by rewriting the assignment operator for objects to be something like this:
 ```lua
@@ -228,15 +260,17 @@ Collection[Int]
 
 # You can declare you're own types/protocols using a protocol syntax:
 Protocol String
-  def << (String) ->String
-  def + (String) ->String
-  def pop ->String
+  def << (String) -> String
+  def + (String) -> String
+  def pop () -> String
 end
 
 # The protocol Syntax registers a global String Protocol attached to the String Class
 # but you can store a reference to this protocol
 string_Protocol = String.protocol
 ```
+
+What about parameter names in functions? Their optional, but recommended. Additionaly you can pass an object in place of a parameter list and Kona will try to match the keys in order, first by popping matching keys, then by passing the remaining values in order, like variadic parameters.
 
 Check types at runtime: Using protocols we should add some builtin Object functions:
 ```ruby
@@ -252,11 +286,12 @@ end
 Named Parameters: Functions on Objects/Collections should, or can use Named Parameters.
 Symbol by Default Index: Symbolized or named keys on Collections by default, so you can do: a = {whatever="loser"} and you can access it's index with: a.whatever (ACTUALLY THIS IS BAD! What about methods on a collection object that match a named dictionary entry?) Maybe all objects should have internal storage for the basic types, and exposed methods will just use that internal storage. So that we can still do that dynamic object stuff. Not sure about this. Exposing more of Lua's semantics and power will make the language more flexible, but not exactly the idiomatic feeling that we're looking for.
 
-Pattern Matching: When using named parameters in function calls or in collection constructors, locally named variables will be used to fill in the giblets.
+Pattern Matching: When using named parameters in function calls or in collection constructors, locally named variables will be used to fill in the gaps.
 ```ruby
 # Optional Type annotations.
 def funky(fresh:->String,bacon:->String)
 	sandwhich = {fresh:, bacon:}
+	eat(sandwhich:)
 end
 ```
 
@@ -287,7 +322,7 @@ Let's look at an array:
 	# > 2
 ```
 
-The defining characeristics are that the values are sequential and the keys are integers. Ok, cool, but we can make a Hash or a Dictionary that does the same thing:
+The defining characteristics are that the values are sequential and the keys are integers. Ok, cool, but we can make a Hash or a Dictionary that does the same thing:
 ```ruby
 	# Make a Dictionary/Hash
 	list = { 0:"literally", 1:"just", 2:"strings"}

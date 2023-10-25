@@ -110,13 +110,13 @@ function_hash.0 "dude"
 ```
 
 ## Reserved words
-and      break    case     continue class
-def      do       else     elseif   end
-enum
-false    for      function if       in
-local    module   nil      not      or
-repeat   return   switch   then     true
-until    unless   when     while
+and       break     case      continue  class
+def       do        else      elseif    end
+enum      false     for       function  if
+in        module    nil       not       or
+repeat    return    struct    super     switch
+then      true      until     unless    when
+while
 
 ## Other Tokens
 +     -     *     /     %     ^     #
