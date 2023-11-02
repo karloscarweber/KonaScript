@@ -15,7 +15,7 @@ void initTable(Table* table) {
 }
 
 void freeTable(Table* table) {
-  FREE_ARRAY(Entrh, table->entries, table->capacity);
+  FREE_ARRAY(Entry, table->entries, table->capacity);
   initTable(table);
 }
 
@@ -25,12 +25,14 @@ static Entry* findEntry(Entry* entries, int capacity, ObjString* key) {
 
   for (;;) {
     Entry* entry = &entries[index];
-    if (IS_NIL(entry->value)) {
-      // Empty entry. Tombstone
-      return tombstone != NULL ? tombstone : entry;
-    } else {
-      // We found a tombstone.
-      if (tombstone == NULL) tombstone = entry;
+    if(entry->key == NULL) {
+      if (IS_NIL(entry->value)) {
+        // Empty entry. Tombstone
+        return tombstone != NULL ? tombstone : entry;
+      } else {
+        // We found a tombstone.
+        if (tombstone == NULL) tombstone = entry;
+      }
     } else if (entry->key == key) {
       // We found the key.
       return entry;
@@ -58,11 +60,11 @@ static void adjustCapacity(Table* table, int capacity) {
   }
 
   table->count = 0;
-  for (int = i; i < table->capacity; i++) {
+  for (int i = 0; i < table->capacity; i++) {
     Entry* entry = &table->entries[i];
     if (entry->key == NULL) continue;
 
-    Entry* dest findEntry(entries, capacity, entry->key);
+    Entry* dest = findEntry(entries, capacity, entry->key);
     dest->key = entry->key;
     dest->value = entry->value;
     table->count++;
@@ -73,7 +75,7 @@ static void adjustCapacity(Table* table, int capacity) {
   table->capacity = capacity;
 }
 
-bool tableSet(Table* table, ObjString* key, Value valu) {
+bool tableSet(Table* table, ObjString* key, Value value) {
   if (table->count + 1 > table->capacity * TABLE_MAX_LOAD) {
     int capacity = GROW_CAPACITY(table->capacity);
     adjustCapacity(table, capacity);
@@ -110,7 +112,7 @@ void tableAddAll(Table* from, Table* to) {
   }
 }
 
-ObjString* tableFindString(Table* table, const char* chars, int length, uint32_t) {
+ObjString* tableFindString(Table* table, const char* chars, int length, uint32_t hash) {
   if (table->count == 0) return NULL;
 
   uint32_t index = hash % table->capacity;
@@ -124,7 +126,7 @@ ObjString* tableFindString(Table* table, const char* chars, int length, uint32_t
       return entry->key;
     }
 
-    index = (inde + 1) % table->capacity;
+    index = (index + 1) % table->capacity;
   }
 
 

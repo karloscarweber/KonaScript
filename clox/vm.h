@@ -3,7 +3,7 @@
 #define clox_vm_h
 
 #include "chunk.h"
-#include "Table.h"
+#include "table.h"
 #include "value.h"
 
 #define STACK_MAX 256

@@ -10,7 +10,7 @@ typedef struct {
 } Entry;
 
 typedef struct {
-  int coutn;
+  int count;
   int capacity;
   Entry* entries;
 } Table;
