@@ -18,7 +18,7 @@ varDecl            → IDENTIFIER ( "=" expression )? (";" | "\n" )? ;
 ### Statements
 Statements product side effects, but don't create bindings.
 ```grammar
-statment           → expression
+statement          → expression
                    | doStmt
                    | forStmt
                    | ifStmt
@@ -80,11 +80,13 @@ DIGIT              → "0" ... "9" ;
 
 **keywords** are reserved words used to build language constructs, these are reserved words and cannot be used as *Names* or *Identifiers*. **Keywords** are case sensitive, and in a case sensitive language won't be trigged by *Names* or *Identifiers* with the same characters but different case.
 ```
-  and     break   do       else         end
-  false   for     func     goto     if        in
-  let     nil     not      or       repeat    return
-  super
-  then    true    until    while    when      unless
+  and       break     case      continue  class
+  def       do        else      end       enum
+  false     for       fun       goto      if
+  in        let       module    nil       not
+  or        repeat    return    self      super
+  switch    then      true      until     unless
+  when      while
 ```
 
 Other tokens:
