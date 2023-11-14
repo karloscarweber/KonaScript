@@ -158,8 +158,6 @@ static void expression() {
   parsePrecedence(PREC_ASSIGNMENT);
 }
 
-
-
 static void expressionStatement() {
   expression();
   consume(TOKEN_SEMICOLON, "Expect ';' after expression.");

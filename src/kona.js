@@ -62,8 +62,8 @@ Kona.scanner = {
     }
   },
   // skipWhitespace()
-  checkKeyword: function (s, start, length, rest, type) {
-    if (s.current - s.start == start + length && ) {
+  checkKeyword: function (s,lookahead,type) {
+    if (KTL[type] == KS.word(s,lookahead)) {
       return type;
     }
     return KT.IDENTIFIER
@@ -71,14 +71,18 @@ Kona.scanner = {
   identifierType: function (s) {
     switch(s.substring(s.start,s.current)) {
       case 'a':
-        return checkKeyword(1,2,"nd", KT.AND);
+        return checkKeyword(s,2,KT.AND);
         break;
       default:
         return KT.AND
     }
   },
   peek: function(s) { return s.source.substr(s.current+1,1) },
-  char: function(s) { return s.source.substr(s.current,1) },
+  char: function(s,lookahead) {
+
+    return s.source.substr(s.current,1)
+  },
+  word: function(s) { return s.source.substring(s.start,s.current) }, // get the current word
   advance: function(s) {
     s.current = s.current+1;
     return KS.char(s);
@@ -102,13 +106,14 @@ Kona.scanner = {
   scan: function(s){
     while (!KS.isAtEnd(s)) {
       console.log(KS.char(s));
-      KS.advance(s);
+      var token = KS.scanToken(s);
     }
   },
 }
 Kona.tokens = {
-    // Single-character tokens.
+
     NULL_TERMINATOR: 0x00,
+
     // GROUPINGS
     LEFT_PAREN:      0x01, RIGHT_PAREN:     0x02,
     LEFT_BRACE:      0x03, RIGHT_BRACE:     0x04,
@@ -125,7 +130,6 @@ Kona.tokens = {
     NOT_EQUAL:       0x16, PIPE_EQUAL:      0x17,
     LESS:            0x18, LESS_EQUAL:      0x19,
     GREATER:         0x1A, GREATER_EQUAL:   0x1B,
-
 
     SEMICOLON:       0x1C, COLON:           0x1D,
     COMMA:           0x1E, DOT:             0x1F,
@@ -164,30 +168,76 @@ Kona.tokens = {
     ERROR:          0x4A,
     EOF:            0x4B,
 }
+// List token Literals here for quick reference in the matcher.
+// Token literals are only added
+Kona.tokenLiterals = {}
+KTL = Kona.tokenLiterals
+// GROUPINGS
+KTL[0x01] = "(", KTL[0x02] = ")",
+KTL[0x03] = "{", KTL[0x04] = "}",
+KTL[0x05] = "[", KTL[0x06] = "]",
+
+KTL[0x07] = "+", KTL[0x08] = "-",
+KTL[0x09] = "*", KTL[0x0A] = "/",
+KTL[0x0B] = "%", KTL[0x0C] = "^",
+KTL[0x0D] = "&", KTL[0x0E] = "~",
+KTL[0x0F] = "|", KTL[0x10] = "<<",
+KTL[0x11] = ">>",KTL[0x12] = "//",
+KTL[0x13] = "||=",
+KTL[0x14] = "=", KTL[0x15] = "==",
+KTL[0x16] = "!=",KTL[0x17] = "|=",
+KTL[0x18] = "<", KTL[0x19] = "<=",
+KTL[0x1A] = ">", KTL[0x1B] = ">=",
+KTL[0x1C] = ";", KTL[0x1D] = ":",
+KTL[0x1E] = ",", KTL[0x1F] = ".",
+KTL[0x20] = "..",KTL[0x21] = "...",
+KTL[0x22] = "::",
+KTL[0x23] = "?", KTL[0x24] = "!",
+
+KTL[0x28] = "nil",
+
+// Keywords
+KTL[0x29] = "and",  KTL[0x2A] = "break",
+KTL[0x2B] = "case", KTL[0x2C] = "continue",
+KTL[0x2D] = "class",KTL[0x2E] = "def",
+KTL[0x2F] = "do",   KTL[0x30] = "else",
+KTL[0x31] = "end",  KTL[0x32] = "enum",
+KTL[0x33] = "false",KTL[0x34] = "for",
+KTL[0x35] = "fun",  KTL[0x36] = "goto",
+KTL[0x37] = "if",   KTL[0x38] = "in",
+KTL[0x39] = "let",  KTL[0x3A] = "module",
+KTL[0x3B] = "not",
+KTL[0x3C] = "or",   KTL[0x3D] = "repeat",
+KTL[0x3E] ="return",KTL[0x3F] = "self",
+KTL[0x40] = "super",KTL[0x41] = "switch",
+KTL[0x42] = "then", KTL[0x43] = "true",
+KTL[0x44] = "until",KTL[0x45] = "unless",
+KTL[0x46] = "when", KTL[0x47] = "while",
+
 Kona.precedence = { // sorted low to high
-  NONE,
-  ASSIGNMENT, // = ||=
-  OR,         // OR, ||
-  AND,        // AND
-  EQUALITY,   // == !=
-  COMPARISON, // < > <= >=
-  TERM,       // + -
-  FACTOR,     // * / % ^
-  UNARY,      // . () << >> & $ ? !
-  PRIMARY
+  NONE=0,
+  ASSIGNMENT=1, // = ||=
+  OR=2,         // OR, ||
+  AND=3,        // AND
+  EQUALITY=4,   // == !=
+  COMPARISON=5, // < > <= >=
+  TERM=6,       // + -
+  FACTOR=7,     // * / % ^
+  UNARY=8,      // . () << >> & $ ? !
+  PRIMARY=9
 }
-// Other tokens:
+Kona.precedences = ["none","assignment","or","and","equality","comparison","term","factor","unary","primary"]
+// Symbol tokens:
 // ```
 //   (     )     {     }     [     ]
 //   +     -     *     /     %     ^
 //   &     ~     |     <<    >>    //    ||=
-//   ==    ~=    <=    >=    <     >     =
+//   ==    ~=    |=    <=    >=    <     >     =
 //   ;     :     ,     .     ..    ...   ::
 //   ?     !
 // ```
 
-Kona.keywords = {
-}
+Kona.keywords = {}
 
 // MAKE SOME DECISIONS
 const KS = Kona.scanner
@@ -206,7 +256,7 @@ Kona.types = [
 ]
 
 // Function operations, This is what the
-Kona.funops = {}
+Kona.funcops = {}
 // Kona Standard library of Kona script function stuff.
 Kona.stdlib = {}
 // Kona Virtual machine.

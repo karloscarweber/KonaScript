@@ -17,14 +17,25 @@ generate:
 printer:
 	lua lox/AstPrinter.lua
 
+##
+##
+##
 # Get Kona bootstrapped
 prebuild:
 	cd LuaJIT; make;
 
+concat:
+	cd kona; luajit concatenater.lua
 
+# Test Kona's Lua code.
+konatest:
+	luajit kona/test/test.lua
+
+# Build and run Kona.
 kona:
 	cd kona; luajit concatenater.lua
 	clang -o kona/kona kona/kona.c LuaJit/src/libluajit.so
+	./kona/kona
 
 konaclean:
 	rm kona/kona;
