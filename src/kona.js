@@ -28,7 +28,7 @@ Kona.scanner = {
     var s = {
       start:0,
       current:0,
-      line:0,
+      line:1,
       source:src,
       tokens:[]}
     Kona.scanner.scan(s);
@@ -39,13 +39,14 @@ Kona.scanner = {
   },
   isAlpha: function(ch){
     var c = KS.chc(ch);
+    console.log(c)
     return (c >= 97 && c <= 122) ||
      (c >= 65 && c <= 90) ||
      c == 95;
      /* "a" == 97, "z" == 122, "A" == 65, "Z" == 90, "_" == 95 */
   },
   identifier: function(s) {
-    while (KS.isAlpha(KS.peek(s)) || KS.isDigit(KS.peek(s)) ) { advance() }
+    while (KS.isAlpha(KS.peek(s)) || KS.isDigit(KS.peek(s)) ) { KS.advance(s) }
     return KS.makeToken(s, KS.identifierType());
   },
   isDigit: function(ch) {
@@ -54,7 +55,7 @@ Kona.scanner = {
     /* "0" == 48, "9" == 57 */
   },
   makeToken: function(s, type) {
-    token = {
+    return {
       type: type,
       start: s.start,
       length: s.current - s.start, // by the time makeToken is called, advance() is first called, making start one ahead of s.current.
@@ -77,15 +78,22 @@ Kona.scanner = {
         return KT.AND
     }
   },
-  peek: function(s) { return s.source.substr(s.current+1,1) },
-  char: function(s,lookahead) {
-
-    return s.source.substr(s.current,1)
+  number: function(s) { // returns a Token
+    while (KS.isDigit(KS.peek(s))) { KS.advance(s)};
+    // look for a decimal point
+    if (KS.peek(s) == '.' && KS.isDigit(KS.peekNext(s))) {
+      KS.advance(s);
+      while (KS.isDigit(KS.peek(s))) { KS.advance(s)};
+    }
+    return KS.makeToken(s,KT.NUMBER);
   },
+  peek: function(s) { return s.source.substr(s.current+1,1) },
+  char: function(s) { return s.source.substr(s.current,1) },
+  advanceChar: function(s) { return s.source.substr(s.current-1,1) },
   word: function(s) { return s.source.substring(s.start,s.current) }, // get the current word
-  advance: function(s) {
+  advance: function(s) { // Advances the character
     s.current = s.current+1;
-    return KS.char(s);
+    return KS.advanceChar(s);
   },
   isAtEnd: function(s){
     if (s.current == s.source.length) { return true }
@@ -96,17 +104,19 @@ Kona.scanner = {
     s.start = s.current;
     if (KS.isAtEnd(s)) { return KS.makeToken(s, KT.EOF) }
 
-    var c = KS.advance();
+    var c = KS.advance(s);
 
-    if (KS.isAlpha(c)) return KS.identifier(s);
-    if (KS.isDigit(c)) return KS.number(s);
+    if (KS.isAlpha(c)) { return KS.identifier(s) }
+    if (KS.isDigit(c)) { return KS.number(s) }
 
+    console.log("unexpected character")
   },
-  // scans the tokens and saves them as... tokens
+  // scans characters and saves them as... tokens
   scan: function(s){
     while (!KS.isAtEnd(s)) {
-      console.log(KS.char(s));
+      console.log("character: ", KS.char(s));
       var token = KS.scanToken(s);
+      s.tokens.push(token);
     }
   },
 }
@@ -197,34 +207,34 @@ KTL[0x23] = "?", KTL[0x24] = "!",
 KTL[0x28] = "nil",
 
 // Keywords
-KTL[0x29] = "and",  KTL[0x2A] = "break",
-KTL[0x2B] = "case", KTL[0x2C] = "continue",
-KTL[0x2D] = "class",KTL[0x2E] = "def",
-KTL[0x2F] = "do",   KTL[0x30] = "else",
-KTL[0x31] = "end",  KTL[0x32] = "enum",
-KTL[0x33] = "false",KTL[0x34] = "for",
-KTL[0x35] = "fun",  KTL[0x36] = "goto",
-KTL[0x37] = "if",   KTL[0x38] = "in",
-KTL[0x39] = "let",  KTL[0x3A] = "module",
+KTL[0x29] = "and",    KTL[0x2A] = "break",
+KTL[0x2B] = "case",   KTL[0x2C] = "continue",
+KTL[0x2D] = "class",  KTL[0x2E] = "def",
+KTL[0x2F] = "do",     KTL[0x30] = "else",
+KTL[0x31] = "end",    KTL[0x32] = "enum",
+KTL[0x33] = "false",  KTL[0x34] = "for",
+KTL[0x35] = "fun",    KTL[0x36] = "goto",
+KTL[0x37] = "if",     KTL[0x38] = "in",
+KTL[0x39] = "let",    KTL[0x3A] = "module",
 KTL[0x3B] = "not",
-KTL[0x3C] = "or",   KTL[0x3D] = "repeat",
-KTL[0x3E] ="return",KTL[0x3F] = "self",
-KTL[0x40] = "super",KTL[0x41] = "switch",
-KTL[0x42] = "then", KTL[0x43] = "true",
-KTL[0x44] = "until",KTL[0x45] = "unless",
-KTL[0x46] = "when", KTL[0x47] = "while",
+KTL[0x3C] = "or",     KTL[0x3D] = "repeat",
+KTL[0x3E] = "return", KTL[0x3F] = "self",
+KTL[0x40] = "super",  KTL[0x41] = "switch",
+KTL[0x42] = "then",   KTL[0x43] = "true",
+KTL[0x44] = "until",  KTL[0x45] = "unless",
+KTL[0x46] = "when",   KTL[0x47] = "while",
 
 Kona.precedence = { // sorted low to high
-  NONE=0,
-  ASSIGNMENT=1, // = ||=
-  OR=2,         // OR, ||
-  AND=3,        // AND
-  EQUALITY=4,   // == !=
-  COMPARISON=5, // < > <= >=
-  TERM=6,       // + -
-  FACTOR=7,     // * / % ^
-  UNARY=8,      // . () << >> & $ ? !
-  PRIMARY=9
+  NONE:0,
+  ASSIGNMENT:1, // = ||=
+  OR:2,         // OR, ||
+  AND:3,        // AND
+  EQUALITY:4,   // == !=
+  COMPARISON:5, // < > <= >=
+  TERM:6,       // + -
+  FACTOR:7,     // * / % ^
+  UNARY:8,      // . () << >> & $ ? !
+  PRIMARY:9
 }
 Kona.precedences = ["none","assignment","or","and","equality","comparison","term","factor","unary","primary"]
 // Symbol tokens:
