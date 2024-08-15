@@ -13,6 +13,7 @@ declaration        → { modDecl | funDecl | varDecl | statement } ;
 modDecl            → ("module"|"class") CONSTANT ( "<" CONSTANT )? {declaration} "end" ;
 funDecl            → "def" IDENTIFIER ( "(" PARAMS? ")" | "" PARAMS "" { BLOCK } "end" ;
 varDecl            → IDENTIFIER ( "=" expression )? (";" | "\n" )? ;
+                   | IDENTIFIER: ( expression )? ("," | "\n" )?
 ```
 
 ### Statements
@@ -95,7 +96,7 @@ Other tokens:
   &     ~     |     <<    >>    //    ||=
   ==    !=    <=    >=    <     >     =
   (     )     {     }     [     ]     ::
-  ;     :     ,     .     ..    ...
+  ;     :     ,     .     ..    ...   ?
 ```
 
 Comments are delimited by a **Hash** symbol: `#`.

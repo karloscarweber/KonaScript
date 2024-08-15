@@ -15,7 +15,7 @@
 #include "konaconf.h"
 
 #include "kona_lua.h"
-#include "sample_lua.h"
+// #include "sample_lua.h"
 
 // Setup static Variables
 static lua_State *globalL = NULL;
@@ -60,22 +60,22 @@ int interpret(const char* source) {
   return 0;
 }
 
-// perhaps just ignore everything above. rewrite everyting we can in Lua first, then we'll worry about speed or whatever.
+// perhaps just ignore everything above. rewrite everything we can in Lua first, then we'll worry about speed or whatever.
 
-static void repl() {
-  char line[1024];
-  for(;;) {
-    printf("> ");
-
-    if (!fgets(line, sizeof(line), stdin)) {
-      printf("\n");
-      break;
-    }
-
-    interpret(line);
-    // printf("interpret(line); \n");
-  }
-}
+// static void repl() {
+//   char line[1024];
+//   for(;;) {
+//     printf("> ");
+//
+//     if (!fgets(line, sizeof(line), stdin)) {
+//       printf("\n");
+//       break;
+//     }
+//
+//     interpret(line);
+//     // printf("interpret(line); \n");
+//   }
+// }
 
 // add message thing
 static void l_message(const char *msg)
@@ -209,10 +209,12 @@ int main() {
   lua_gc(L, LUA_GCSTOP, 0);
   luaL_openlibs(L);
   lua_gc(L, LUA_GCRESTART, -1);
-
+  // dofile is the Kona Lua frontend and library.
   dofile = dostring(L, kona_lua, "kona_lib");
   // dofile = luaL_loadstring(L, kona_lua);
   if (dofile == 0) {
+    // Kona_start is a global in kona.lua, we're calling it here
+    // to start the repl.
     lua_getglobal(L, "Kona_start");
     lua_call(L,0,0);
   } else {

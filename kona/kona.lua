@@ -21,6 +21,13 @@ function Kona:main(...)
   end
 end
 
+function Kona:run(input)
+  print("Trying to load a chunk")
+  print(input)
+  chunk = load(input)
+  chunk()
+end
+
 -- Runs a command prompt that loops and accepts program input.
 function Kona:runPrompt()
   io.write("start Kona Prompt:") -- io.write, writes that thing
@@ -32,8 +39,9 @@ function Kona:runPrompt()
     print("reading the buffer")
     if not (input == "exit") then
       print(input)
-      -- Kona.run(input)
-      Kona.hadError = false
+      -- here we probably need to check for errors
+      Kona:run(input)
+      -- Kona.hadError = false
     end
     print("after input?")
   until input == "exit" or Kona.exit == true

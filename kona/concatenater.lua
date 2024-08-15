@@ -59,8 +59,9 @@ function makestring(file)
   return name, buffer
 end
 
+-- combines the sources into a single file, thats' then compiled into the library.
 function combine()
-  local sources, headers = {'sample.lua', 'kona.lua'}, {}
+  local sources, headers = {'kona.lua'}, {}
 
   for i, file in ipairs(sources) do
     local name, str = makestring(file)

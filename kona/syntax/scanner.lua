@@ -1,4 +1,4 @@
--- scanner.lua
+-- kona/syntax/scanner.lua
 
 -- scans tokens, kicks ass
 
@@ -156,6 +156,8 @@ function Scanner:scanToken ()
 end
 
 Scanner.scanTokenFunctions = {
+
+  -- Single Character tokens
   ["("] = function (s) s:addToken(LEFT_PAREN) end,
   [")"] = function (s) s:addToken(RIGHT_PAREN) end,
   ["{"] = function (s) s:addToken(LEFT_BRACE) end,
@@ -233,21 +235,23 @@ Scanner.keywords = {
 ["def"]      = DEF,
 ["do"]       = DO,
 ["else"]     = ELSE,
-["elseif"]   = ELSEIF,
 ["end"]      = END,
 ["enum"]     = ENUM,
 ["false"]    = FALSE,
 ["for"]      = FOR,
-["function"] = FUNCTION,
+["fun"]      = FUN,
+["goto"]     = GOTO,
 ["if"]       = IF,
 ["in"]       = IN,
+["is"]       = IS,
+["let"]      = LET,
 ["module"]   = MODULE,
 ["nil"]      = NIL,
 ["not"]      = NOT,
 ["or"]       = OR,
 ["repeat"]   = REPEAT,
 ["return"]   = RETURN,
-["struct"]   = STRUCT,
+["self"]     = SELF,
 ["super"]    = SUPER,
 ["switch"]   = SWITCH,
 ["then"]     = THEN,
