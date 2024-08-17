@@ -4,8 +4,6 @@
 
 -- scanner.lua
 -- Is the scanner for the thing.
--- require('lox/token_type')
--- require('lox/token')
 
 -- make namespace
 Scanner = {}

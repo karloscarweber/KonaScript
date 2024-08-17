@@ -1,5 +1,5 @@
 # Grammar
-Trying to write a Grammer almost as small as Lua's in Extended BNF. To start, we'll mirror Lua's Grammar, then make changes. {A} means 0 or more As. [A] means an optional A. Names and repetitions terminated by a quotation mark "?", are optional.
+Trying to write a Grammar almost as small as Lua's in Extended BNF. To start, we'll mirror Lua's Grammar, then make changes. {A} means 0 or more As. [A] means an optional A. Names and repetitions terminated by a quotation mark "?", are optional.
 
 To begin, the program is a number of declarations ending with an **EOF** termination symbol.
 ```grammar
@@ -11,13 +11,13 @@ Each program is a series of successive declarations. Declarations are used to as
 ```grammar
 declaration        → { modDecl | funDecl | varDecl | statement } ;
 modDecl            → ("module"|"class") CONSTANT ( "<" CONSTANT )? {declaration} "end" ;
-funDecl            → "def" IDENTIFIER ( "(" PARAMS? ")" | "" PARAMS "" { BLOCK } "end" ;
+funDecl            → "def" IDENTIFIER ( "(" PARAMS? ":"? ")" | "" PARAMS "" ) { BLOCK } "end" ;
 varDecl            → IDENTIFIER ( "=" expression )? (";" | "\n" )? ;
                    | IDENTIFIER: ( expression )? ("," | "\n" )?
 ```
 
 ### Statements
-Statements product side effects, but don't create bindings.
+Statements produce side effects, but don't create bindings.
 ```grammar
 statement          → expression
                    | doStmt
@@ -39,7 +39,7 @@ whileStmt          → "while" ["("] expression [")"] block?
 printStmt          → "print" expression ( ";" | "\n" ] ;
 returnStmt         → "return" expression? ( ";" | "\n" )?
 whileStmt          → "while" expression? doStmt ;
-block              → "{" declaration "}" | "do" declaration "end" ;
+BLOCK              → "{" declaration "}" | "do" declaration "end" ;
 ```
 Note that although blocks have two syntax patterns, either surrounded by curly braces, or by a "do" "end" pair, They cannot be used interchangeably.
 
@@ -50,7 +50,7 @@ Expressions return values, they don't make declarations. Expressions are usually
 expression         → assignment ;
 assignment         → { call "."} IDENTIFIER "=" assignment | logic_or ;
 ;
-logic_or           → logic_nad { "or" logic_and}
+logic_or           → logic_and { "or" logic_and}
 logic_and          → equality { "and" equality } ;
 equality           → comparison { ( "!=" | "==" | "is" | "not" ) "} ;
 comparision        → term { ( ">"  | ">=" | "<" | "<=" ) term } ;
@@ -97,11 +97,21 @@ Other tokens:
   ==    !=    <=    >=    <     >     =
   (     )     {     }     [     ]     ::
   ;     :     ,     .     ..    ...   ?
+  ->    =>   /*    */
 ```
 
-Comments are delimited by a **Hash** symbol: `#`.
+Comments are delimited by double slashes: `//`.
 ```
-# This is a comment
+// This is a comment
+```
+
+multiline comments are delimited by open and close comments, like in C:
+```
+/*
+  This is a multiline
+  comment
+  that works great.
+*/
 ```
 
 ## Sample Code?:

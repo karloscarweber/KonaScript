@@ -5,13 +5,15 @@
 require 'dots' -- Require the testing framework
 require 'kona/syntax/token'
 
+local filename = 'kona/test/test_scanner.lua'
+
 -- A Sample Test file.
-local token_test = Dots.Test:new("tokens")
+local scanner_test = Dots.Test:new("scanner", filename)
 
 -- Test the testing framework
-token_test:add("[test_scanner] Scanner:new", function(r)
-  local tk = Token("brunette","brown","brownhair",5)
-  r:_truthy((tk.type == "brunette"),"WHAT! She's not a brunette")
+scanner_test:add("[test_scanner] Scanner:new", function(r)
+  local tk = Token("brunette","brown","brownhair", 5)
+  r:truthy((tk.type == "brunette"),"WHAT! She's not a brunette")
   -- r:_truthy(scanner, "Scanner is not initialized")
   -- r:_truthy(scanner2, "Scanner is not initialized")
   -- r:_shape(scanner, {source="string", tokens={}, start="number", line="number",current="number"}, "Scanner object not in expected shape")

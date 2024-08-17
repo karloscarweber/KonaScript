@@ -30,7 +30,7 @@ object["name="] = function(new_value)
 	return self.___values["name"] = new_value
 end
 ```
-The `["name="]` is a borrowed ruby idiom that wrapps the assignment method of a property of an object rather than exposing the property directly. The internal structure of an object should then be something like this:
+The `["name="]` is a borrowed ruby idiom that wraps the assignment method of a property of an object rather than exposing the property directly. The internal structure of an object should then be something like this:
 ```Lua
 Object = {
 	___values = {},
@@ -44,7 +44,7 @@ Object = {
 ```
 
 Syntactically we'll interpret an assignment to a variable in an object as something like this:
-```Lua
+```Kona
 object = {}
 object.name = "Spock"
 ```
@@ -62,3 +62,6 @@ We're borrowing and using as much of Lua as possible, while adding syntactic sug
  * [The Evolution of Lua](https://www.lua.org/doc/hopl.pdf)
  * [Exceptions in Lua](https://www.lua.org/gems/lpg113.pdf)
  * [Lua Array Utility](https://github.com/stephannv/lua.util)
+
+### More ideas
+Another thing I've been thinking about is using the language to write the language, To bootstrap core features from a smaller set of features. One such thing is postfix and prefix control statements that accept custom blocks. Like the `do {code} unless`. Why can't `unless` be written in kona? AND be a protected keyword.

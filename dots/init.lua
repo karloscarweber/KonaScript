@@ -50,43 +50,63 @@ end
 
 -- just slow down
 function Dots.wait(milliseconds, str)
-  local start = os.clock()
-  local milli = milliseconds * 0.01
-  -- print("start: "..tostring(start))
+  local start, milli = os.clock(), milliseconds * 0.01
   repeat until os.clock() > start + milli
-  -- print("end:   "..tostring(start + milli))
   io.write(str)
   io.flush()
 end
 
 function Dots:print_results()
   local test_string, error_list, test_count = "Testing: ", {}, 0
-
   local sr = table.shuffle(self.results)
-
   -- Iterate over the Tests
   for _,r in ipairs(sr) do
     local rr = table.shuffle(r)
     for _,d in ipairs(rr) do
-      -- Go through the results in the tests now.
 
-      for k,t in ipairs(d.results) do
+      local test = d
+      local assertions = d.results
+
+      -- Go through the results in each assertion now.
+      for k,assertion in ipairs(assertions) do
         test_count = test_count + 1
-        if t.pass == true then
+
+        if assertion.pass == true then
+          -- If we have a passing test,
+          -- set the dot to a nice green dot.
           -- test_string = test_string.."."
-          Dots.wait(1, color.fg.green..".")
+          Dots.wait(1, color.fg.green.."•")
         else
           -- test_string = test_string.."x"
-          Dots.wait(1, color.fg.red.."x")
+          Dots.wait(1, color.fg.red.."X")
           local errors_string = ""
-          if t.errors ~= nil and type(t.errors) == 'table' then
-            for k,v in ipairs(t.errors) do
+          if assertion.errors ~= nil and type(assertion.errors) == 'table' then
+            for k,v in ipairs(assertion.errors) do
               errors_string = "    "..errors_string .. v .. "\n"
             end
           end
 
-          table.insert(error_list, color.fg.red.."Test Failed in: "..d.name.."\n".."["..t.name.."] "
-          ..t.message.."\n"..errors_string..color.reset)
+          local mg = ""
+          mg = mg..color.fg.red.."Test Failed in: "
+          mg = mg..test.name.."\n"
+            mg = mg.."   "..test.file..":"..assertion.line..": "
+            mg = mg.."["..assertion.name.."] "
+            mg = mg..assertion.message.."\n"
+
+            if type(assertion.value) == 'table' then
+              mg = mg.."   Actual: \n"
+              mg = mg..table.tostring(assertion.value)
+              mg = mg.."\n"
+              mg = mg.."\n"
+            elseif assertion.value == 'nil' then
+              mg = mg.."   Actual: nil"
+            else
+              mg = mg.."   Actual: "..assertion.value
+            end
+
+          mg = mg..errors_string..color.reset
+
+          table.insert(error_list, mg)
         end
       end
 
@@ -94,11 +114,10 @@ function Dots:print_results()
     io.write(color.reset..'\n')
   end
 
-  test_string = test_string .. "\n"
+  -- test_string = test_string .. "\n"
 
   -- Now that we have our results, print them.
 
-  -- print(test_string)
   print(test_count.." Assertions, "..tostring(#error_list).." Failures.\n")
 
   if #error_list < 1 then
@@ -195,25 +214,28 @@ function Task:execute()
 
     -- probably have to look at the assertion_object for the test results when
     -- it doesn't error out.
-    local result = {
-      name = v.name,
-      results = assertion_object.results,
-    }
     -- store the result in the results thing.
-    table.insert(self.results, result)
+    table.insert(self.results, {
+        name = v.name,
+        file = v.file,
+        results = assertion_object.results,
+      })
   end
   return self.results
 end
 
 -- Create an assertion object
 -- errors is optional, when it's not, it's an Array of Error Messages.
-function Dots.Assertion(name, status, message, errors)
+function Dots.Assertion(name, status, message, errors, line, value)
   if message == nil then message = "" end
+  if value == nil then value = "nil" end
   return {
     name = name,
     pass = status,
     message = message,
-    errors = errors
+    errors = errors,
+    line = line,
+    value = value,
   }
 end
 
@@ -226,42 +248,48 @@ function Dots.AssertionsObject:new()
   return t
 end
   -- debug_data = function() end,
-function Dots.AssertionsObject:_equal(value, control, message)
-  local status = true
-  if value ~= control then status = false end
-  table.insert(self.results, Assertion("_equal_assertion", status, message))
-  return nil
-end
-function Dots.AssertionsObject:_truthy(value, message)
-  local status = true
-  if not value then status = false end
-  table.insert(self.results, Assertion("_truthy_assertion", status, message))
-  return nil
-end
+  function Dots.AssertionsObject:truthy(value, message)
+    local line = debug.getinfo(2).currentline
+    local status = true
+    if not value then status = false end
+    table.insert(self.results, Assertion("_truthy_assertion", status, message, nil, line, value))
+    return nil
+  end
+  function Dots.AssertionsObject:equal(value, control, message)
+    local line = debug.getinfo(2).currentline
+    local status = true
+    if value ~= control then status = false end
+    table.insert(self.results, Assertion("_equal_assertion", status, message, nil, line, value))
+    return nil
+  end
+
 function Dots.AssertionsObject:_false(value, message)
+  local line = debug.getinfo(2).currentline
   local status = true
   if value then status = false end
-  table.insert(self.results, Assertion("_false_assertion", status, message))
+  table.insert(self.results, Assertion("_false_assertion", status, message, nil, line, value))
   return nil
 end
 function Dots.AssertionsObject:_match(value, control, message)
+  local line = debug.getinfo(2).currentline
   local status = true
   if value ~= control then status = false end
-  table.insert(self.results, Assertion("_match_assertion", status, message))
+  table.insert(self.results, Assertion("_match_assertion", status, message, nil, line, value))
   return nil
 end
 -- _shape tests the types of keys and not their values.
-function Dots.AssertionsObject:_shape(value, control, message)
+function Dots.AssertionsObject:shape(value, control, message)
+  local line = debug.getinfo(2).currentline
   if type(value) ~= 'table' then
     -- return failure, value not table.
-    table.insert(self.results, Assertion("_shape_assertion", false, message))
+    table.insert(self.results, Assertion("_shape_assertion", false, message, nil, line, value))
     return nil
   end
 
   local res = self:___recursiveShape(value, control)
   local status = true
   if #res > 0 then status = false end
-  table.insert(self.results, Assertion("_shape_assertion", status, message, res))
+  table.insert(self.results, Assertion("_shape_assertion", status, message, res, line, value))
   return nil
 end
 
@@ -269,6 +297,7 @@ end
 -- checking shape assumes that a table value is being checked, and that we
 -- only check the types and presence of keys and values.
 function Dots.AssertionsObject:___recursiveShape(value, control)
+  local line = debug.getinfo(2).currentline
   local res = {}
   for k,v in pairs(control) do
     if value[k] == nil then
@@ -292,16 +321,16 @@ Dots.Test = {}
 -- creates a new Test object
 --
 -- Use this in your test files to create a new test then add it to the list of all tests.
-function Dots.Test:new(name)
+function Dots.Test:new(name, filename)
   -- Save this debug stuff for later.
   -- print("calling function of Dots.Test:new  ")
   -- print(debug.getinfo(2))
   -- make the new Test prototype
   t = {
     name = name, -- name of the test
-    file = "", -- figure out how to get the filename from the caller
+    file = filename, -- figure out how to get the filename from the caller
     error = nil, -- A string is put here when it fails with an error code.
-    tests = {}
+    tests = {},
   }
   setmetatable(t, Dots.Test)
   self.__index = self
@@ -311,7 +340,11 @@ end
 -- adds an actual assertion block to the test
 function Dots.Test:add(test_name, funk)
   if funk == nil then print("funk was nil for that last test") end
-  table.insert(Dots.test_destination, {name=test_name, funk=funk})
+  table.insert(Dots.test_destination, {
+    name = "["..self.name.."]"..test_name,
+    funk = funk,
+    file = self.file,
+  })
 end
 
 -- code run to setup the environment for a task
