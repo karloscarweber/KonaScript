@@ -65,3 +65,8 @@ We're borrowing and using as much of Lua as possible, while adding syntactic sug
 
 ### More ideas
 Another thing I've been thinking about is using the language to write the language, To bootstrap core features from a smaller set of features. One such thing is postfix and prefix control statements that accept custom blocks. Like the `do {code} unless`. Why can't `unless` be written in kona? AND be a protected keyword.
+
+### Some documents I Like about Programming languages generally:
+
+* [The Next 700 ProgrammingLanguages](https://homepages.inf.ed.ac.uk/wadler/papers/papers-we-love/landin-next-700.pdf)
+* [Article about compiling C to WebAssembly](https://surma.dev/things/c-to-webassembly/)

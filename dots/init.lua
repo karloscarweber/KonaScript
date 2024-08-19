@@ -247,21 +247,21 @@ function Dots.AssertionsObject:new()
   self.__index = self
   return t
 end
-  -- debug_data = function() end,
-  function Dots.AssertionsObject:truthy(value, message)
-    local line = debug.getinfo(2).currentline
-    local status = true
-    if not value then status = false end
-    table.insert(self.results, Assertion("_truthy_assertion", status, message, nil, line, value))
-    return nil
-  end
-  function Dots.AssertionsObject:equal(value, control, message)
-    local line = debug.getinfo(2).currentline
-    local status = true
-    if value ~= control then status = false end
-    table.insert(self.results, Assertion("_equal_assertion", status, message, nil, line, value))
-    return nil
-  end
+--
+function Dots.AssertionsObject:truthy(value, message)
+  local line = debug.getinfo(2).currentline
+  local status = true
+  if not value then status = false end
+  table.insert(self.results, Assertion("_truthy_assertion", status, message, nil, line, value))
+  return nil
+end
+function Dots.AssertionsObject:equal(value, control, message)
+  local line = debug.getinfo(2).currentline
+  local status = true
+  if value ~= control then status = false end
+  table.insert(self.results, Assertion("_equal_assertion", status, message, nil, line, value))
+  return nil
+end
 
 function Dots.AssertionsObject:_false(value, message)
   local line = debug.getinfo(2).currentline
