@@ -2,7 +2,7 @@
 
 // TODO: Rename to Compiler.
 // Compiles Kona code into Wren.
-// Eventually We'll modify the Wren compiler directly to generate Wren bytecode
+// Eventually We'll modify the Wren compiler directly to generate Wren byte code
 // from Kona Source code.
 import "io" for Stdin, Stdout, Directory
 import "/token" for Token, Keywords

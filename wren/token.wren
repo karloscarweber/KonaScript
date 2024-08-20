@@ -93,8 +93,12 @@ var AllKeywords = {
   "while":     "WHILE",
 }
 
-// Token
-// The token class represents tokens that the scanner makes as it scans the code.
+/**
+ * The token class represents tokens that the scanner makes as it scans the
+ * code.
+ *
+ * some values are optional, such as the literal and the lexeme
+ */
 class Token {
 
   type { _type }
@@ -105,11 +109,10 @@ class Token {
   /**
    * Constructs a new token.
    *
-   *  params:
-   *    type:    String found in Tokens.all
-   *    lexeme:  String
-   *    literal: String
-   *    line:    Number
+   * @param {String} type A Type found in `Tokens.all`.
+   * @param {String} lexeme Lexeme of the token.
+   * @param {String} literal The string literal of the token, if it has one.
+   * @param {Number} line Line number the token is found on.
    */
   construct new(type, lexeme, literal, line) {
     _type = type
@@ -122,22 +125,34 @@ class Token {
     }
   }
 
-  // to String function
+  /**
+   * Returns a printable String
+   *
+   * @return {String} A printable string for debugging.
+   */
   toString { _type + " => [" + _lexeme + "] " + _literal }
 
-  // description function
+  /**
+   * Returns a printable description
+   *
+   * @return {String} A printable string for debugging.
+   */
   description { "(line:" + line + ") - " + type + "  " + lexeme + " " + literal }
 }
 
 class Tokens {
 
   /**
-   * Returns all tokens in TokenTypes
+   * Returns a set of all tokens in TokenTypes
+   *
+   * @return {Sequence[String]} A Set of strings, all token types in TokenTypes.
    */
   static all { TokenTypes }
 
   /**
-   * Checks for the presence of token
+   * Checks for the presence of a token, and returns it's code if it's present.
+   *
+   * @return {String/false} Either a token code, or false.
    */
   static [token] {
     if (TokenTypes.contains(token)) {
@@ -151,9 +166,16 @@ class Tokens {
 class Keywords {
 
   /**
+   * Returns all keywords in AllKeywords
+   *
+   * @return {Sequence[String]} A set of strings.
+   */
+  static all { AllKeywords }
+
+  /**
    * checks to see if a given lexeme is a valid token
    *
-   * returns the token code if true, otherwise false
+   * @return {String} Returns the token code if it's a Keyword, otherwise false
    */
   static [lexeme] {
     if (AllKeywords.containsKey(lexeme)) {
