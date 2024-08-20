@@ -5,7 +5,7 @@
 // Eventually We'll modify the Wren compiler directly to generate Wren bytecode
 // from Kona Source code.
 import "io" for Stdin, Stdout, Directory
-import "/token" for Token, TokenType, Keywords
+import "/token" for Token, Keywords
 import "/error" for Error
 
 // an attempt to write a scanner in wren for fun.
@@ -98,9 +98,8 @@ class Scanner {
     // in Lua, you can use strings as indexes, so here we're checking
     // to see if the current identifier is a keyword, if not, then
     // the type is an IDENTIFIER.
-    var type = _source[_start.._current]
-    System.print(type)
-    if (!Keywords.contains(type)) { type = "IDENTIFIER" }
+    var type = Keywords[_source[_start...(_current)]]
+    if (!type) { type = "IDENTIFIER" }
     addToken(type)
   }
 
@@ -114,7 +113,6 @@ class Scanner {
     }
 
     addToken("NUMBER")
-    // addToken("NUMBER", _source[_start.._current])
   }
 
   // string()
@@ -127,13 +125,14 @@ class Scanner {
     }
 
     if (isAtEnd() ) {
-      // error("unterminated string. at line: %(_line)")
-      // Fiber.abort("Something bad happened")
       Error.failure("unterminated string. at line: %(_line)")
       return null
     }
 
     advance()
+
+    // String token literals don't include their quotation marks,
+    // The first and last character in the string.
     addToken("STRING", _source[(_start+1)..(_current-1)])
   }
 
@@ -198,7 +197,7 @@ class Scanner {
   // Adds a token of given type.
   // type is probably a keyword.
   addToken(type) {
-    _tokens.add(Token.new(type, _source[_start.._current], "", _line))
+    _tokens.add(Token.new(type, _source[_start.._current-1], "", _line))
   }
 
   // addToken(_,_)
@@ -297,11 +296,3 @@ class Scanner {
   */
 
 }
-
-
-// Test code
-// Below we start playing with and testing what we've defined above.
-
-// make a token
-// var tokey = Token.new("string","whatever", "\"whatever\"","1")
-// System.print(tokey.toString)

@@ -56,11 +56,17 @@ var suite = Testie.new("Scanner") {|it, skip|
   }
 
   it.should("<Scanner> discovers keywords properly") {
-    var s = Scanner.new("var identifier")
+    var s = Scanner.new("var identifier = 19")
     s.scanTokens()
     var tok = s.tokens[0]
-    // System.print(s.tokens[0])
-    Assert.equal(tok.type, "KEYWORD", "\"%(tok.type)\" Token expected to be a \"KEYWORD\".")
+
+    // Make certain that the lexeme that we're capturing for a keyword doesn't
+    // include an extra space.
+    var ll = tok.lexeme.count
+    Assert[ll, 3, "\"%(tok.lexeme)\"(%(ll)) Lexeme expected to be a 3 characters long."]
+
+
+    Assert.equal(tok.type, "VAR", "\"%(tok.type)\" Token expected to be a \"VAR\". Lexeme: %(tok.lexeme)")
     // Assert.equal(tok.lexeme, "var", "\"%(tok.lexeme)\" lexeme expected to be a \"var\".")
     Assert.equal(tok.literal, "", "\"%(tok.literal)\" expected to be \"whatever\".")
   }

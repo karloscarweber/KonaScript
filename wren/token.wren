@@ -1,9 +1,100 @@
 // Token.wren
 // Where the token class definition can be found.
 
+// Token Types
+// Token Types include special characters, and reserved words.
+// They are global here because we need to access them
+// in a lot of spots, will probably name space these later.
+var TokenTypes = [
+  "LEFT_PAREN",
+  "RIGHT_PAREN",
+  "LEFT_BRACE",
+  "RIGHT_BRACE",
+  "LEFT_BRACKET",
+  "RIGHT_BRACKET",
+  "COMMA",
+  "DOT",
+  "MINUS",
+  "PLUS",
+  "SLASH",
+  "STAR",
+  "BANG",
+  "BANG_EQUAL",
+  "EQUAL",
+  "EQUAL_EQUAL",
+  "GREATER",
+  "GREATER_EQUAL",
+  "LESS",
+  "LESS_EQUAL",
+  "MODULO",
+  "CARAT",
+  "POUND",
+  "AND",
+  "AND_AND",
+  "PIPE",
+  "QUESTION",
+  "COLON",
+  "SNAIL",
+  "LESS_LESS",
+  "GREATER_GREATER",
+  "DOT_DOT",
+  "DOT_DOT_DOT",
+  "STAR_STAR",
+  "IDENTIFIER",
+  "STRING", // "STRING CONTENTS"
+  "NUMBER",
+
+  // KEYWORDS AND STUFF
+  "AS",
+  "BREAK",
+  "CLASS",
+  "CONSTRUCT",
+  "CONTINUE",
+  "ELSE",
+  "FALSE",
+  "FOR",
+  "FOREIGN",
+  "IF",
+  "IMPORT",
+  "IN",
+  "IS",
+  "NULL",
+  "RETURN",
+  "STATIC",
+  "SUPER",
+  "THIS",
+  "TRUE",
+  "VAR",
+  "WHILE",
+  "EOF",
+]
+
+var AllKeywords = {
+  "as":        "AS",
+  "break":     "BREAK",
+  "class":     "CLASS",
+  "construct": "CONSTRUCT",
+  "continue":  "CONTINUE",
+  "else":      "ELSE",
+  "false":     "FALSE",
+  "for":       "FOR",
+  "foreign":   "FOREIGN",
+  "if":        "IF",
+  "import":    "IMPORT",
+  "in":        "IN",
+  "is":        "IS",
+  "null":      "NULL",
+  "return":    "RETURN",
+  "static":    "STATIC",
+  "super":     "SUPER",
+  "this":      "THIS",
+  "true":      "TRUE",
+  "var":       "VAR",
+  "while":     "WHILE",
+}
+
 // Token
 // The token class represents tokens that the scanner makes as it scans the code.
-//
 class Token {
 
   type { _type }
@@ -11,7 +102,15 @@ class Token {
   literal { _literal }
   line { _line }
 
-  // Constructs a new token.
+  /**
+   * Constructs a new token.
+   *
+   *  params:
+   *    type:    String found in Tokens.all
+   *    lexeme:  String
+   *    literal: String
+   *    line:    Number
+   */
   construct new(type, lexeme, literal, line) {
     _type = type
     _lexeme = lexeme
@@ -19,7 +118,7 @@ class Token {
     _line = line
 
     if(literal == null) {
-      _literal = "nil"
+      _literal = "null"
     }
   }
 
@@ -30,121 +129,37 @@ class Token {
   description { "(line:" + line + ") - " + type + "  " + lexeme + " " + literal }
 }
 
-// Token Types
-// Token Types include special characters, and reserved words.
-// They are global here because we need to access them
-// in a lot of spots, will probably name space these later.
+class Tokens {
 
-// tokens:
-//
-//  Single Character Tokens
-//    LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE, COMMA, DOT, MINUS, PLUS,
-//     SEMICOLON, SLASH, STAR, BANG,
-//
-//  One or Two Character tokens
-//    BANG_EQUAL, EQUAL, EQUAL_EQUAL, GREATER, GREATER_EQUAL, LESS, LESS_EQUAL,
-//
-//  Literals
-//    IDENTIFIER, STRING, NUMBER,
-//
-//  Keywords
-//    AND, BREAK, CASE, CONTINUE, CLASS, DEF, DO, ELSE, END, ENUM, FALSE, FOR,
-//    FUN, GOTO, IF, IN, IS, LET, MODULE, NIL, NOT, OR, REPEAT, RETURN, SELF,
-//    SUPER, SWITCH, THEN, TRUE, UNTIL, UNLESS, WHEN, WHILE
-//
-//    EOF
+  /**
+   * Returns all tokens in TokenTypes
+   */
+  static all { TokenTypes }
 
-var TokenType = [
-"LEFT_PAREN",
-"RIGHT_PAREN",
-"LEFT_BRACE",
-"RIGHT_BRACE",
-"COMMA",
-"DOT",
-"MINUS",
-"PLUS",
-"SEMICOLON",
-"SLASH",
-"STAR",
-"BANG",
-"BANG_EQUAL",
-"EQUAL",
-"EQUAL_EQUAL",
-"GREATER",
-"GREATER_EQUAL",
-"LESS",
-"LESS_EQUAL",
-"IDENTIFIER",
-"STRING",
-"NUMBER",
-"AND",
-"BREAK",
-"CASE",
-"CONTINUE",
-"CLASS",
-"DEF",
-"DO",
-"ELSE",
-"END",
-"ENUM",
-"FALSE",
-"FOR",
-"FUN",
-"GOTO",
-"IF",
-"IN",
-"IS",
-"LET",
-"MODULE",
-"NIL",
-"NOT",
-"OR",
-"REPEAT",
-"RETURN",
-"SELF",
-"SUPER",
-"SWITCH",
-"THEN",
-"TRUE",
-"UNTIL",
-"UNLESS",
-"WHEN",
-"WHILE",
-"EOF",
-]
+  /**
+   * Checks for the presence of token
+   */
+  static [token] {
+    if (TokenTypes.contains(token)) {
+      return TokenTypes[token]
+    }
+    return false
+  }
 
-var Keywords = [
-  "and",
-  "break",
-  "case",
-  "continue",
-  "class",
-  "def",
-  "do",
-  "else",
-  "end",
-  "enum",
-  "false",
-  "for",
-  "fun",
-  "goto",
-  "if",
-  "in",
-  "is",
-  "let",
-  "module",
-  "nil",
-  "not",
-  "or",
-  "repeat",
-  "return",
-  "self",
-  "super",
-  "switch",
-  "then",
-  "true",
-  "until",
-  "unless",
-  "when",
-  "while"
-]
+}
+
+class Keywords {
+
+  /**
+   * checks to see if a given lexeme is a valid token
+   *
+   * returns the token code if true, otherwise false
+   */
+  static [lexeme] {
+    if (AllKeywords.containsKey(lexeme)) {
+      return AllKeywords[lexeme]
+    }
+    return false
+  }
+
+}
