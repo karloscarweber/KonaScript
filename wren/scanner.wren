@@ -4,9 +4,10 @@
 // Compiles Kona code into Wren.
 // Eventually We'll modify the Wren compiler directly to generate Wren byte code
 // from Kona Source code.
-import "io" for Stdin, Stdout, Directory
-import "/token" for Token, Keywords
-import "/error" for Error
+import "io"      for Stdin, Stdout, Directory
+import "/token"  for Token, Keywords
+import "/error"  for Error
+import "/modules/StringTools" for StringTools
 
 // an attempt to write a scanner in wren for fun.
 class Scanner {
@@ -15,14 +16,13 @@ class Scanner {
     State Setup
   */
   setupState() {
-    _source = "hello friends (){},;\n"
+    _source = "hello friends (){},;\0"
     _tokens = []
-    _start = 0
-    _current = 0
+    _start = 0 // The start of the current inspection pointer
+    _current = 0 // the current inspection pointer position
     _line = 1
 
     // acceptable end characters
-    _endings = ["\n","\r","\0"]
     _alphaCharacters = [
     "a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z",
     "A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","A","A","Z",
@@ -35,13 +35,10 @@ class Scanner {
   */
   source { _source }
   source=(value) {
-    if (!_endings.contains(value[(value.count-1)..(value.count-1)])) {
-      _source = value + "\0"
-    } else {
-      _source = value
-    }
+    _source = value // StringTools.ensureValudeEnding(value)
   }
   tokens { _tokens }
+  current { _current }
 
   /*
     Constructors
@@ -51,6 +48,7 @@ class Scanner {
   construct new(source) {
     setupState()
     if(source != null) {
+      // _source = StringTools.ensureValidEnding(source)
       _source = source
     }
   }
@@ -66,11 +64,16 @@ class Scanner {
   // scanTokens
   // The main loop to scan tokens in the provided source
   scanTokens() {
+    // begins at _start=0 and _current=0, which would get the first character
+    // After we make a token match, somewhere in scanTokens we advance() then
+    // start at the beginning of whatever comes next.
     while (isAtEnd() == false) {
+      skipWhiteSpace()
       _start = _current
       scanToken()
     }
 
+    // We're making byte code so at the end we always add and EOF token.
     _tokens.add(Token.new("EOF", "", "", 1))
     return _tokens
   }
@@ -89,18 +92,39 @@ class Scanner {
     Methods that transform a lexeme into a token and move the scanner along.
   */
 
+  skipWhiteSpace() {
+    while (true) {
+      var c = peek()
+      if (c == " ")  {
+        advance()
+      } else  if (c == "/r") {
+        advance()
+      } else  if (c == "/t") {
+        advance()
+      } else  if (c == "/n") {
+        // we advance the line number forward to track lines. but otherwise, treat
+        // this like other whitespace.
+        _line = _line + 1
+        advance()
+        break
+      } else {
+        break
+      }
+    }
+
+  }
+
   // identifier
   // adds an identifier token to the list of tokens
-  identifier() {
+  identifierOrKeyword() {
     while ( isAlphaNumeric( peek() ) ) { advance() }
 
-    // This next part will need to be rewritten
-    // in Lua, you can use strings as indexes, so here we're checking
-    // to see if the current identifier is a keyword, if not, then
-    // the type is an IDENTIFIER.
-    var type = Keywords[_source[_start...(_current)]]
-    if (!type) { type = "IDENTIFIER" }
-    addToken(type)
+    var type = Keywords[_source[_start..._current]]
+    if (!type) {
+      addToken("IDENTIFIER", _source[_start..._current])
+    } else {
+      addToken(type)
+    }
   }
 
   // number
@@ -124,16 +148,16 @@ class Scanner {
       advance()
     }
 
-    if (isAtEnd() ) {
+    if (isAtEnd()) {
       Error.failure("unterminated string. at line: %(_line)")
       return null
     }
 
     advance()
 
-    // String token literals don't include their quotation marks,
-    // The first and last character in the string.
-    addToken("STRING", _source[(_start+1)..(_current-1)])
+    // We advance the start one to avoid the Quotation mark. and use the
+    // exclusive `...` range operator which excludes the later number.
+    addToken("STRING", _source[(_start+1)...(_current)])
   }
 
   // match(_)
@@ -149,21 +173,21 @@ class Scanner {
 
   // getCurrent()
   // gets the current character
-  getCurrent() {
-    return getCurrent(0)
-  }
+  getCurrent() { getCurrent(0) }
 
-  // getCurrent(_)
-  // gets the current character
+  /**
+   * Gets the current character
+   */
   getCurrent(step) {
-    return _source[(_current+step)..(_current+step)]
+    if (isAtEnd()) {
+      return "\0"
+    }
+    return _source[_current+step.._current+step]
   }
 
   // peek()
   // peeks at the next character
-  peek() {
-    return peek(0)
-  }
+  peek() { peek(0) }
 
   // peek(_)
   // peeks at the next character, at step
@@ -203,7 +227,7 @@ class Scanner {
   // addToken(_,_)
   // Adds a token of give type, with literal provided.
   addToken(type, literal) {
-    _tokens.add(Token.new(type, _source[_start.._current], literal, _line))
+    _tokens.add(Token.new(type, _source[_start.._current-1], literal, _line))
   }
 
   /*
@@ -223,10 +247,7 @@ class Scanner {
 
   // isAtEnd
   // checks against the end of the document
-  isAtEnd() {
-    // System.print("End: (%(_current))..(%(_source.count)) %(_current >= _source.count)")
-    return _current >= (_source.count -1)
-  }
+  isAtEnd() { _current >= _source.count }
 
   // advance()
   // advances the character checker forward.
@@ -235,8 +256,24 @@ class Scanner {
     return getCurrent()
   }
 
+  /**
+   * Skips the current character and moves on to the next. Used to advance over
+   * whitespace.
+   */
+  skip() { }
+
   // Scans Tokens
-  scanToken () {
+  scanToken() {
+
+    // At this point advance() moves the token forward one step ahead of start.
+    // Starting from the beginning it would be _start = 0, _current = 1.
+    // use _source[_start..._current] to get the current character. the `..` is
+    // exclusive. That means it leaves off index at the end. _current will
+    // always be at least ahead by 1.
+    //
+    // Some of our matchers below also advance, but don't advance at the end of
+    // their blocks. This is because to do so would the move the _start forward
+    // to many places.
     var c = advance()
 
     // massive switch statement
@@ -275,19 +312,24 @@ class Scanner {
     } else  if (c=="/") {
       if (match("/")) {
         // comments go to the end of the line
+        // so we try to consume everythign we can.
         while ( peek() != "\n" && !isAtEnd() ) { advance() }
       } else {
         addToken("/")
       }
-    } else  if (c == " ")  { /* Do Nothing */
+    } else  if (c == " ")  {
+      // We do nothing here to fall through scanner.
+      // If we're not at the end, the scanner will start over at the next
+      // character.
     } else  if (c == "/r") { /* Do Nothing */
     } else  if (c == "/t") { /* Do Nothing */
-    } else  if (c == "/n") {
-      _line = _line + 1
     } else  if (c == "\"") { /*"*/
+      // We call the special string method to figure out what to do.
       string()
+    } else  if (isDigit(c)) {
+      number()
     } else  if (isAlphaNumeric(c)) {
-      identifier()
+      identifierOrKeyword()
     }
   }
 
