@@ -180,11 +180,11 @@ TK.add("EOF")            //               "EOF",
  * some values are optional, such as the literal and the lexeme
  */
 class Token {
-  static new(type, lexeme, literal, line, value) {
+  static new(type, start, length, line, value) {
     return { 
       "type": type, 
-      "lexeme": lexeme, 
-      "literal": literal, 
+      "start": start, 
+      "length": length, 
       "line": line,
       "value": value }
   }
@@ -443,11 +443,13 @@ class Parser {
     _current = _current + 1
     return getCurrent()
   }
+  
+  // Parsing -------------------------------------------------------------------
 
   // Lex the next token and store it in [next]
   nextToken() {
     _previous = _current
-    _current = _next
+    _current = _next // notice that we don't set _next here, we do it somewhere else.
 
     // if we're out of tokens, don't tokenize more.
     if (_next.type == TK.EOF) return
@@ -455,7 +457,6 @@ class Parser {
 
     while (peekChar() != "\0") {
       _tokenStart = currentChar
-
 
       var c = nextChar()
       // massive switch statement
@@ -478,11 +479,12 @@ class Parser {
         makeToken(")")
         return
 
-      } else  if (c == "{") {
-        makeToken("{")
-      } else  if (c == "}") {
-        makeToken("}")
       }
+    //else  if (c == "{") {
+    //    makeToken("{")
+    //  } else  if (c == "}") {
+    //    makeToken("}")
+    //  }
       //} else  if (c == "[") { makeToken("[")
       //} else  if (c == "]") { makeToken("]")
       //} else  if (c == ",") { makeToken(",")
@@ -530,7 +532,7 @@ class Parser {
 
 
 
-  // Parsing -------------------------------------------------------------------
+  
 
   // returns the type of the current token
   peek() { _current.type }
@@ -628,12 +630,7 @@ class Parser {
   */
   // constructor with source
   // use this when parsing and scanning new code
-  construct new(source) {
-    setupState()
-    if(source != null) {
-      _source = StringTools.ensureValidEnding(source)
-    }
-  }
+  construct new(source) { _source = source}
   
   // constructor without source
   // use this for kicks and giggles.
@@ -657,10 +654,17 @@ class Parser {
     _numParens = 0
     
     
+    parser.next.type = TK.ERROR;
+    parser.next.start = source;
+    parser.next.length = 0;
+    parser.next.line = 0;
+    parser.next.value = UNDEFINED_VAL;
+    
     // tokens
-    _next = Token.new(0,"","",1,0)
-    _current = Token.new(0,"","",1,0)
-    _previous = Token.new(0,"","",1,0)
+    // set up the null token
+    _next = Token.new(TK.ERROR, 0, 0, 0, VAL.UNDEFINED)
+    _current = null
+    _previous = null
     
     _parens = 255 // maximum number of parens
     _numParens = 0 // current number of parens, important for nested stuff.
@@ -668,12 +672,11 @@ class Parser {
     _printErrors = false
     _hasError = false // Error flag
     
-    
     // To get started, we read the first 2 tokens.
     
     // Read the first Token:
     nextToken()
-    // Copy next -> current, just lik Wren
+    // Copy next -> current, just like Wren
     nextToken()
     
     // Compiler stuff we're not gonna add right now.
