@@ -530,8 +530,6 @@ class Parser {
 
   }
 
-
-
   
 
   // returns the type of the current token
@@ -661,7 +659,7 @@ class Parser {
     parser.next.value = UNDEFINED_VAL;
     
     // tokens
-    // set up the null token
+    // set up the null tokens
     _next = Token.new(TK.ERROR, 0, 0, 0, VAL.UNDEFINED)
     _current = null
     _previous = null
@@ -689,6 +687,8 @@ class Parser {
     // the magic while loop that cycles through every character to tokenize
     // everything.
     while (!match(TK.EOF)) {
+      // what does this do?
+      definition("compiler")
   
     }
     
