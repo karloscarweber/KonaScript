@@ -128,35 +128,42 @@ end
 
 Leaving this blank will implicitly set an optional return type of Anything. `Object?`.
 
-Hashes are like Dictionaries and Arrays at the same time. Omitting a key for a value just means that the value can only be referenced by their place in the sequence. In fact, just like Lua, there is a hash array, and an array array, reference by a number.
+Hashes map unique keys to values. Values can be almost any object, as well as keys. But they are not guaranteed to be sequential. hash keys can be any name, or a string. You can also use Json Style syntax to set the keys:
 ```kona
-list = {"cheese", "crackers",numskull="whatever"}
-list.count
-> 2
-list.0
-> cheese
-list.crackers
-> nil
-list.numskull
-> whatever
+platter = {cheese: "Gouda", cracker: "Saltine", meat: "salami"}
 ```
 
-The `.` character is the index operator. It tries to find the following index in the preceding object/value. So `myObject.value` is the same as `myObject["value"]`.
+Keys are converted to symbols under the hood, unless they can't be symbols. Hash keys can also be strings, numbers, or objects:
+```kona
+platter = {cheese: "Gouda", cracker: "Saltine", meat: "salami"}
+spread = {}
+spread[platter] = "contemporary spread"
+```
+
+If the key is a bare word, like a valid name, or valid symbol, and you leave it's contents blank, then Kona will try to fill it with a variable of the same name in the local scope:
+```kona
+cheese   = "Gouda"
+crackers = "Saltine"
+meat     = "Salami"
+list = {cheese:, crackers:, meat:, } // Trailing Commas are allowed
+```
 
 Assigning a value to an empty key in a hash will make that key:
 ```kona
 friends = {}
-friends.best = "Collin"
-friends.indexes.count
+friends[:best] = "Collin"
+friends.count
 > 1
-friends.best
+friends[:best]
 > Collin
 ```
+
+### Lists:
 
 You can add values directly to a list using the shovel:
 ```kona
 list = {"_why", "Matz", "Marco"}
-list << "Joel"
+list << "Collin"
 list.count
 > 4
 ```
@@ -167,32 +174,24 @@ cheeses = "Cheddar"
 cheeses << ", Gouda" << ", Provologne"
 ```
 
-Functions are first class value objects. They can be created, assigned, passed around, invoked, and disappeared by setting them to nil. They act as closures, and enclose their surrounding environment when referencing values from outside of them. They are nice. parenthesis are optional when invoking functions.
+### Functions
+
+Functions are first class value objects. They can be created, assigned, passed around, invoked, and disappeared by setting them to nil. They act as closures, and enclose their surrounding environment when referencing values from outside of them. They are nice.
 ```kona
-def funky name
+funky name do
 	print name
 end
 funky "karl"
 > karl
-funky
+funky()
 >
-&funky
+puts funky
 > <function 1904883>
 ```
 
-You can store a reference to the function by grabbing it's handle:
-```kona
-fresh = &funky
-> <function 1904883>
-print fresh
-> <function 1904883>
-```
 
-If you reference a function, and it's not immediately preceded by a `&` prefix declaration then it's assumed that your calling it.
-
-Now calling the function requires an explicit call:
+Calling the function requires an explicit call:
 ```kona
-fresh()
 fresh()
 ```
 
