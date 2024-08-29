@@ -3,11 +3,11 @@ I'm trying out a build using Wren. Wren has *almost* everything I want. If this 
 
 Kona is a Browser focused Programming language for making front ends and websites. It doesn't use Javascript. and we don't care about it. It's a replacement. It's meant to be minimal. It's meant for larger applications that run in the browser, not tiny little things. (which seems odd because KONA is minimal). (Maybe make it for minimal small stuff too?)
 
-This is an important distinction because although wren is pretty small, and clocks in at around 200 KB in a WASM build, (with another 100 KB of the js harness), it's still pretty big to send across the wire to someones browser. Basic websites, or sites with basic functionality shouldn't rely on a whole new programming language being dumped in to their environment.
+This is an important distinction because although wren is pretty small, and clocks in at around 200 KB in a WASM build, (with another 100 KB of the js harness), it's still pretty big to send across the wire to your browser. Basic websites, or sites with basic functionality shouldn't rely on a whole new programming language being dumped in to their environment.
 
 The other issue is that the current implementation of WASM in browsers doesn't allow direct access to key javascript apis. So it's kind of a bummer. This is a first step to hopefully overcome that.
 
-If that all fails, the language can still be very effect as a UI focused language if attached to a rendering harness. Like a Game engine, one of the main uses of Wren, the host VM.
+If that all fails, the language can still be very effective as a UI focused language if attached to a rendering harness. Like a Game engine, one of the main uses of Wren, the host VM.
 
 ## VM Target
 Kona's goals are to target the wren VM, by replacing it's compiler. Additions and changes to the syntax will complicate the implementation. But by focusing on emitting valid VM byte code, from parsed code, we can take advantage of the work to get a small language working.
@@ -25,14 +25,17 @@ Kona's goals are to target the wren VM, by replacing it's compiler. Additions an
 ### Scanner design:
 The Scanner scans for tokens, produces a linked AST tree, and then emits Valid Wren code. Its' the first step to a fully functional parser in *C* to replace Wren's front end. But of course the first step is to Scan for tokens and to display the syntax tree.
 
-Parser, scans/lexes code to produc tokens.
+Parser, scans/lexes code to produce tokens.
 * Make Parser
 * Parser accepts code
 * parse scans code to produce tokens
-* Compiler accepts tokens to produce bytecode
-* Recompiler accepts bytecode to produce recompiled code. (JIT step way later?)
 
-The target is the wren VM. So Wren bytecode is the eventual output.
+Compiler
+* Compiler accepts tokens to produce pseudo code
+* Pseudo code is optimized to produce Byte Code
+* Byte Code is sent to the VM with a bow to be run.
+
+The target is the wren VM. So Wren Byte Code is the eventual output. Which I think is great. We can focus on the front end for a while knowing we have a reliable backend waiting for us. Additionally, there are a lot of features of the Wren VM, that we can use creatively to achieve the ergonomics we're looking for.
 
 
 

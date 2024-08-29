@@ -10,7 +10,7 @@ var Parser = Kona.Parser
 var suite = Testie.new("Compiler class should:") {|it, skip|
 
   it.should("start up") {
-    var parser = Parser.new()
+    var parser = Parser.new("{json:\"value\"}")
     parser.konaScan()
     Assert.ok(true)
     parser.spitTokens()

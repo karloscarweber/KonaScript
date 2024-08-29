@@ -380,9 +380,7 @@ class Parser {
     // forces newlines to appear on the line they appear.
     // otherwise they would be on the next line.
     if (type == TK.LINE) tk.line = tk.line - 1
-    
     tokens.add(tk)
-    
     return tk
   }
   
@@ -437,18 +435,24 @@ class Parser {
 
         makeToken(TK.RIGHT_PAREN)
         break
+      } else if (c == "{") {
+        makeToken(TK.LEFT_BRACE)
+        break
+      } else if (c == "}") {
+        makeToken(TK.RIGHT_BRACE)
+        break
+      } else if (c == "[") {
+        makeToken(TK.LEFT_BRACKET)
+        break
+      } else if (c == "]") {
+        makeToken(TK.RIGHT_BRACKET)
+        break
       } else {
-        
         // catch all other tokens as null token for now.
         makeToken(TK.NULL)
         break
       }
       
-    //else  if (c == "{") {
-    //    makeToken("{")
-    //  } else  if (c == "}") {
-    //    makeToken("}")
-    //  }
       //} else  if (c == "[") { makeToken("[")
       //} else  if (c == "]") { makeToken("]")
       //} else  if (c == ",") { makeToken(",")
