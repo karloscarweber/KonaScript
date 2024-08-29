@@ -41,6 +41,7 @@ class Tokens {
     tokens.add(raw)
     tokenLiterals[raw] = (tokens.count - 1)
   }
+  // receives an index, which is a number, and returns the string
   static [index] { tokens[index] }
   static LEFT_PAREN { 0 }
   static RIGHT_PAREN { 1 }
@@ -189,6 +190,11 @@ class Token {
       "line": line,
       "value": value }
   }
+  static new() { new(null,null,null,null,null)}
+  static toString(token) {
+    var tokenthing = "jfdkjfdk"
+    return "%(tokenthing) %(token["start"])..%(token["length"])::%(token["line"]) = %(token["value"]) "
+  }
 }
 
 /**
@@ -240,7 +246,6 @@ class Isa {
 // It parses Wren at first, then it should parse The theoretical Kona
 class Parser {
 
-
   /*
     Compiler stuff
   */
@@ -253,7 +258,7 @@ class Parser {
     // start at the beginning of whatever comes next.
     while (isAtEnd() == false) {
       skipWhiteSpace()
-      _startPos = _currentPos
+      _tokenStart = _currentPos
       nextToken()
     }
 
@@ -266,7 +271,7 @@ class Parser {
   // Method to print the tokens that have been scanned.
   spitTokens() {
     for (token in _tokens) {
-      System.print(token.toString)
+      System.print(Token.toString(token))
     }
   }
 
@@ -287,7 +292,7 @@ class Parser {
       } else  if (c == "/n") {
         // we advance the line number forward to track lines. but otherwise, treat
         // this like other whitespace.
-        _line = _line + 1
+        _currentLine = _currentLine + 1
         advance()
         break
       } else {
@@ -328,12 +333,12 @@ class Parser {
   string() {
     advance()
     while (peek() != "\"" && !isAtEnd() ) {   //"
-      if (peek() == "\n") { _line = _line + 1 }
+      if (peek() == "\n") { _currentLine = _currentLine + 1 }
       advance()
     }
 
     if (isAtEnd()) {
-      Error.failure("unterminated string. at line: %(_line)")
+      Error.failure("unterminated string. at line: %(_currentLine)")
       return null
     }
 
@@ -343,17 +348,6 @@ class Parser {
     // exclusive `...` range operator which excludes the later number.
     addToken("STRING", _source[(_start+1)...(_current)])
   }
-
-  // match(_)
-  // checks against an expected value
-//  match(expected) {
-//    if ( isAtEnd() || getCurrent() != expected ) {
-//      return false
-//    }
-//
-//    _current = _current + 1
-//    return true
-//  }
 
   // getCurrent()
   // gets the current character
@@ -369,57 +363,31 @@ class Parser {
     return _source[_current+step.._current+step]
   }
 
-  // peekNext()
-  // peeks at the next next character
-  //peekNext() {
-  //  if (_current + 1 >= _source.count) {
-  //    return "\0"
-  //  }
-  //  return getCurrent(1)
-  //}
-
-  // peekBack()
-  // peeks at the previous character
-  peekBack() {
-    // short circuits to see if it's the end.
-    if (_current == _source.count) {
-      return "\0"
-    }
-    return getCurrent(-1)
-  }
 
   // makeToken(_)
   // makes a token and adds it to the party.
   // accepts the token index
   // the way the parser works is that it sets the parser's current token
   // to this.
-  makeToken(type) {
-    next["type"] = type
-    next["start"] = _startPos
-    next["length"] = (_currentPos - _startPos)
-    next["line"] = _line
-    next["value"] = 0
+  makeToken(type, value) {
+    var tk = Token.new()
+    tk["type"] = type
+    tk["start"] = _tokenStart
+    tk["length"] = currentTokenLength
+    tk["line"] = _currentLine
+    tk["value"] = value
     
     // forces newlines to appear on the line they appear.
     // otherwise they would be on the next line.
-    if (type == TK.LINE) next.line = next.line - 1
+    if (type == TK.LINE) tk.line = tk.line - 1
+    
+    tokens.add(tk)
+    
+    return tk
   }
-
-  // addToken(_)
-  // Adds a token of given type.
-  // type is probably a keyword.
-  addToken(type) {
-    _tokens.add(Token.new(type, _source[_start.._current-1], "", _line, 0))
-  }
-
-  // addToken(_,_)
-  // Adds a token of give type, with literal provided.
-  addToken(type, literal) {
-    if (type == "STRING") {
-      System.print(literal)
-    }
-    _tokens.add(Token.new(type, _source[_start.._current-1], literal, _line, 0))
-  }
+  
+  // for when we don't have values for a token
+  makeToken(type) { makeToken(type, null) }
 
   /*
     Utilities
@@ -427,14 +395,8 @@ class Parser {
 
   // isAtEnd
   // checks against the end of the document
-  isAtEnd() { _current == _source.count - 1 }
-
-  // advance()
-  // advances the character checker forward.
-  advance() {
-    _current = _current + 1
-    return getCurrent()
-  }
+  isAtEnd() { _currentPos == _source.count - 1 }
+  currentTokenLength { currentLexeme.count }
   
   // Parsing -------------------------------------------------------------------
 
@@ -446,37 +408,42 @@ class Parser {
     // if we're out of tokens, don't tokenize more.
     if (_next.type == TK.EOF) return
     if (_current.type == TK.EOF) return
-
+    
     // the loop works to match tokens,
     // tokens are made inside.
     while (peekChar() != "\0") {
       _tokenStart = _currentPos
-
+      
       // get the next Character, and advances the character checker
-      var c = nextChar() 
+      var c = nextChar()
+      // from here on out currentPos is advanced, so we can't count on that,
+      // to get the current character, because we already have it. 
       // massive switch statement
       if (c == "(") {
         // Because we're modeling this parser after Wren, we need to count the
         // unmatched '(' when we're in an interpolated expression
         if (_numParens > 0) parens[_numParens - 1] = parens[_numParens - 1] + 1
-        makeToken(TK.Left_PAREN)
-        return
+        makeToken(TK.LEFT_PAREN)
+        break
       } else  if (c == ")") {
         // If we're interpolating, then count the ')'
         if (_numParens > 0 && ((parens[_numParens - 1]) - 1) == 0) {
           // Final ")", so the interpolation ends
           // now begins next portion of the template string
           _numParens = _numParens - 1
-          readString()
-          return
+          //readString() // fill this in soon
+          break
         }
 
-        makeToken(")")
-        return
-
+        makeToken(TK.RIGHT_PAREN)
+        break
+      } else {
+        
+        // catch all other tokens as null token for now.
+        makeToken(TK.NULL)
+        break
       }
-      // temporary return to just bail if we're not matching anything.
-      return
+      
     //else  if (c == "{") {
     //    makeToken("{")
     //  } else  if (c == "}") {
@@ -530,56 +497,8 @@ class Parser {
     makeToken(TK.EOF)
   }
 
-  // returns the type of the current token
-  peek() { _current.type }
-
-  // returns the type of the next token
-  peekNext() { _next.type }
-
-  // Consumes the current token if its type is [expected]. Returns true if it was consumed
-  // expected param is an integer, returned 
-  match(expected) {
-    if (peek() != expected) return false
-    nextToken()
-    return true
-  }
-
-  // Consumes the current token. Emits an error if it's not what we expect
-  consume(expected, errorMessage) {
-    nextToken()
-    if (previous.type != expected) {
-      Error[errorMessage]
-
-      if (current.type == expected) nextToken()
-    }
-  }
-
-  // Matches one or more newlines. Returns true if at least one was found.
-  matchLine() {
-    if (!match("TOKEN_LINE")) return false
-
-    while (match("TOKEN_LINE")) {
-      // just keep matching.
-    }
-    return true
-  }
-
-  // Discards any newlines starting at the current token.
-  ignoreNewlines() { matchLine }
-
-  // consumes the current token. Emits an error if it's not a newline
-  consumeLine(errorMessage) {
-    consume("TOKEN_LINE", errorMessage)
-    ignoreNewlines()
-  }
-
-  allowLineBeforeDot() {
-    if (peek() == "TOKEN_LINE" && peekNext() == "TOKEN_DOT") nextToken()
-  }
-
   // peeks at the next character, doesn't consume it.
-  peekChar() { currentChar }
-
+  peekChar() { _source[_currentPos] }
   // peeks at the next character
   peekNextChar() {
     // Don't read past the end of the source file
@@ -587,24 +506,33 @@ class Parser {
     return currentChar(1)
   }
 
-  // Get's the next character
-  // and advances the scanner
-  // Copied almost verbatim from Wren
+  // Get the next character
+  // advances the current position forward
   nextChar() {
     var c = peekChar()
-    // In C in Wren, this a ++ increment. It makes sense because each character
-    // is a pointer and the sequence of pointers increments. Here we need to
-    // instead advance by the currentPos and get the next Character
     _currentPos = _currentPos + 1
-    if (c == "\n") _line = _line + 1
+    if (c == "\n") _currentLine = _currentLine + 1
     return c
+  }
+  
+  // returns the type of the current token
+  peek() { _current.type }
+  // returns the type of the next token
+  peekNext() { _next.type }
+  
+  // returns true if we match a token type
+  match(expected) {
+    if (peek() != expected) return false
+    nextToken()
+    return true
   }
 
   /**
    * Skips the current character and moves on to the next. Used to advance over
    * whitespace.
    */
-  skip() { }
+  skip() { advance() }
+  advance() { _curentPos = _curentPos + 1 }
   
   /*
     Accessors
@@ -613,32 +541,18 @@ class Parser {
   source { _source }
   source=(value) { _source = value }
   tokens { _tokens }
-  current { _current } // current Token
-  next { _next }
-  currentChar(step) { 
-    System.print("_currentPos: %(_currentPos)")
-    System.print("step: %(step)")
-    System.print("_source length: %(_source.count)")
-    _source[_currentPos + step]
-  }
   currentChar { currentChar(0) } // current character
-  currentLexeme { _source[_startPos.._currentPos] }
+  currentLexeme { source[_tokenStart.._currentPos - 1] }
   
   /*
     Constructors
   */
   // constructor with source
-  // use this when parsing and scanning new code
   construct new(source) { _source = source}
-  
-  // constructor without source
-  // use this for kicks and giggles.
   static new() { new("hello friends (){},;\0") }
   
   // Starts the compiler
-  konaCompile() {
-    System.print("compiler started.")
-    
+  konaScan() {    
     // setup state
     _module = "Main"
     _source = "var hello = yeeehah()\n\0"
@@ -653,7 +567,6 @@ class Parser {
     
     _tokenStart = 0 // The start of the current inspection pointer
     _currentPos = 0 // the current inspection pointer position
-    // in C this is also _currentChar
     _currentLine = 1 // The current line
     _numParens = 0
     
@@ -666,37 +579,12 @@ class Parser {
     _parens = 255 // maximum number of parens
     _numParens = 0 // current number of parens, important for nested stuff.
     
-    _printErrors = false
-    _hasError = false // Error flag
-    
-    // To get started, we read the first 2 tokens.
-    
-    // Read the first Token:
-    nextToken()
-    // Copy next -> current, just like Wren
-    nextToken()
-    
-    // Compiler stuff we're not gonna add right now.
-    
-    
-    // wren compiler is recursive for expressions that are compiled wren.
-    // we're not doing that right now.
-    // if(isExpression)
-    
-    // the magic while loop that cycles through every character to tokenize
-    // everything.
-    while (!match(TK.EOF)) {
-      // Definition will create the code in the main module. or at least define 
-      // it.
-      //definition("compiler")
+    // while the current count is less, advance.
+    while (!isAtEnd()) {
+      nextToken()
     }
     
-    // When we start emitting bytecode, this is where the end module bytecode goes
-    // emitOp(CODE.END_MODULE)
-    
-    
-    // emitOp(CODE.RETURN)
-    
+    makeToken(TK.EOF)
   }
 
   // Scans Tokens

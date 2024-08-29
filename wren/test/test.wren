@@ -11,8 +11,9 @@ var suite = Testie.new("Compiler class should:") {|it, skip|
 
   it.should("start up") {
     var parser = Parser.new()
-    parser.konaCompile()
+    parser.konaScan()
     Assert.ok(true)
+    parser.spitTokens()
   }
 
   //it.should("parse a simple line") {
