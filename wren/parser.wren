@@ -192,7 +192,7 @@ class Token {
   }
   static new() { new(null,null,null,null,null)}
   static toString(token) {
-    var tokenthing = "jfdkjfdk"
+    var tokenthing = TK[token["type"]]
     return "%(tokenthing) %(token["start"])..%(token["length"])::%(token["line"]) = %(token["value"]) "
   }
 }
@@ -494,7 +494,6 @@ class Parser {
     
     // If we get to this point, it' means we've reached the end of the source
     _tokenStart = _currentPos
-    makeToken(TK.EOF)
   }
 
   // peeks at the next character, doesn't consume it.
