@@ -3,6 +3,7 @@ import "../modules/wren-testie/testie" for Testie
 import "../modules/wren-assert/Assert" for Assert
 
 import "../kona" for Kona
+import "../parser" for Tokens
 
 var Parser = Kona.Parser
 
@@ -28,6 +29,38 @@ var suite = Testie.new("Compiler class should:") {|it, skip|
     Assert[parser.tokens[0]["value"] == "var"]
     Assert[parser.tokens[2]["value"] == "hello"]
     Assert[parser.tokens[6]["value"] == "yeeehah"]
+  }
+  
+  it.should("parse keywords") {
+    var parser = Parser.new("as break class construct continue else false for foreign if import in is null return require static super this true var while \0")
+    parser.konaScan()
+    parser.spitTokens()
+    var pt = parser.tokens
+    var TK = Tokens
+    
+    Assert[pt[0]["type"], TK.get("as"), "was actually: %(pt[0]["type"])"]
+    Assert[pt[2]["type"], TK.get("break"), "was actually: %(pt[2]["type"])"]
+    Assert[pt[4]["type"], TK.get("class"), "was actually: %(pt[4]["type"])"]
+    Assert[pt[6]["type"], TK.get("construct"), "was actually: %(pt[6]["type"])"]
+    Assert[pt[8]["type"], TK.get("continue"), "was actually: %(pt[8]["type"])"]
+    Assert[pt[10]["type"], TK.get("else"), "was actually: %(pt[10]["type"])"]
+    Assert[pt[12]["type"], TK.get("false"), "was actually: %(pt[12]["type"])"]
+    Assert[pt[14]["type"], TK.get("for"), "was actually: %(pt[14]["type"])"]
+    Assert[pt[16]["type"], TK.get("foreign"), "was actually: %(pt[16]["type"])"]
+    Assert[pt[18]["type"], TK.get("if"), "was actually: %(pt[18]["type"])"]
+    Assert[pt[20]["type"], TK.get("import"), "was actually: %(pt[20]["type"])"]
+    Assert[pt[22]["type"], TK.get("in"), "was actually: %(pt[22]["type"])"]
+    Assert[pt[24]["type"], TK.get("is"), "was actually: %(pt[24]["type"])"]
+    Assert[pt[26]["type"], TK.get("null"), "was actually: %(pt[26]["type"])"]
+    Assert[pt[28]["type"], TK.get("return"), "was actually: %(pt[28]["type"])"]
+    Assert[pt[30]["type"], TK.get("require"), "was actually: %(pt[30]["type"])"]
+    Assert[pt[32]["type"], TK.get("static"), "was actually: %(pt[32]["type"])"]
+    Assert[pt[34]["type"], TK.get("super"), "was actually: %(pt[34]["type"])"]
+    Assert[pt[36]["type"], TK.get("this"), "was actually: %(pt[36]["type"])"]
+    Assert[pt[38]["type"], TK.get("true"), "was actually: %(pt[38]["type"])"]
+    Assert[pt[40]["type"], TK.get("var"), "was actually: %(pt[40]["type"])"]
+    Assert[pt[42]["type"], TK.get("while"), "was actually: %(pt[42]["type"])"]
+    
   }
 
   //it.should("parse a simple line") {

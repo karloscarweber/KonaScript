@@ -94,21 +94,22 @@ class Tokens {
   static IS  { 46 }
   static NULL  { 47 }
   static RETURN  { 48 }
-  static STATIC  { 49 }
-  static SUPER  { 50 }
-  static THIS  { 51 }
-  static TRUE  { 52 }
-  static VAR  { 53 }
-  static WHILE  { 54 }
-  static FIELD  { 55 }
-  static STATIC_FIELD  { 56 }
-  static NAME  { 57 }
-  static NUMBER  { 58 }
-  static STRING { 59 }
-  static INTERPOLATION { 60 }
-  static LINE { 61 }
-  static ERROR { 62 }
-  static EOF  { 63 }
+  static REQUIRE  { 49 }
+  static STATIC  { 50 }
+  static SUPER  { 51 }
+  static THIS  { 52 }
+  static TRUE  { 53 }
+  static VAR  { 54 }
+  static WHILE  { 55 }
+  static FIELD  { 56 }
+  static STATIC_FIELD  { 57 }
+  static NAME  { 58 }
+  static NUMBER  { 59 }
+  static STRING { 60 }
+  static INTERPOLATION { 61 }
+  static LINE { 62 }
+  static ERROR { 63 }
+  static EOF  { 64 }
 }
 var TK = Tokens
 TK.add("(")              //        "LEFT_PAREN",
@@ -160,6 +161,7 @@ TK.add("in")             //                "IN",
 TK.add("is")             //                "IS",
 TK.add("null")           //              "NULL",
 TK.add("return")         //            "RETURN",
+TK.add("require")        //           "REQUIRE",
 TK.add("static")         //            "STATIC",
 TK.add("super")          //             "SUPER",
 TK.add("this")           //              "THIS",
