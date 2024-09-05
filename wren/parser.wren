@@ -43,6 +43,7 @@ class Tokens {
   }
   // receives an index, which is a number, and returns the string
   static [index] { tokens[index] }
+  static get(index) { tokenLiterals[index] }
   static LEFT_PAREN { 0 }
   static RIGHT_PAREN { 1 }
   static LEFT_BRACE { 2 }
@@ -322,7 +323,7 @@ class Parser {
     while ( isAlphaNumeric( peek() ) ) { advance() }
 
     var lit = _source[_start..._current]
-    var type = TK[lit]
+    var type = TK.get[lit]
     if (!type) {
       addToken("NAME", TK[lit])
     } else {
@@ -417,6 +418,8 @@ class Parser {
 
   // Lex the next token and store it in [next]
   nextToken() {
+  
+    // references the tokens
     _previous = _current
     _current = _next // notice that we don't set _next here, we do it somewhere else.
 
@@ -424,8 +427,9 @@ class Parser {
     if (_next.type == TK.EOF) return
     if (_current.type == TK.EOF) return
     
-    // the loop works to match tokens,
-    // tokens are made inside.
+    // The loop works to match tokens, tokens are made inside this loop.
+    // each token has a kind of character that begins it's parsing. Then
+    // more detailed logic is applied to continue advancing 
     while (peekChar() != "\0") {
       _tokenStart = _currentPos
       
@@ -465,13 +469,18 @@ class Parser {
         makeToken(TK.RIGHT_BRACKET)
         break
       } else if (Isa.name(c)) {
-        // If this could be a name, or the character coulde be part of the name.
         
         // This block should be moved to a function that grabs all the charac-
         // ters for the name and adds the token. Doing it here for brevity
         // and simplicity first.
         while (Isa.name(peekChar())) nextChar()
-        makeToken(TK.NAME, currentLexeme)
+        var cl = currentLexeme
+        
+        if (TK.get(cl)) {
+          makeToken(TK.get(cl), cl)
+        } else {
+          makeToken(TK.NAME, cl)  
+        }
         break
       } else {
         // catch all other tokens as null token for now.
@@ -594,7 +603,8 @@ class Parser {
   construct new(source) { _source = source}
   static new() { new("hello friends (){},;\0") }
   
-  // Starts the compiler
+  // Starts the scanner
+  // creates a list of tokens that can then be compiled.
   konaScan() {    
     // setup state
     _module = "Main"

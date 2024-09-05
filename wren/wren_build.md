@@ -39,16 +39,16 @@ The target is the wren VM. So Wren Byte Code is the eventual output. Which I thi
 
 
 
-# Reduced syntax set:
+# syntax set:
 To get KONA bootstrapped and built with the basics we're going for a reduced set of keywords and capabilities. Making, like, a fancy calculator.
 
-## Reduced Reserved words
+## Reserved words
 we're changing the reserved words list to be greatly reduced and to match the words reserved in Wren. We want to add a few reserved words of our own to add the pieces we want. But for now let's just keep it simple.
 ```
-as break class construct continue else false for foreign if import in is null return static super this true var while
+as break class construct continue else false for foreign if import in is null return require static super this true var while
 ```
 
-## Reduced Symbol tokens
+## Symbol tokens
 ```
 (     )     {     }     [     ]
 ,     .     -     +    /     *
@@ -59,7 +59,7 @@ as break class construct continue else false for foreign if import in is null re
 **
 ```
 
-# Reduced BNF description
+# BNF description
 
 {A} means 0 or more As, [A] means an optional A.
 
