@@ -13,7 +13,21 @@ var suite = Testie.new("Compiler class should:") {|it, skip|
     var parser = Parser.new("{json:\"value\"}")
     parser.konaScan()
     Assert.ok(true)
+  }
+  
+  it.should("spit tokens") {
+    var parser = Parser.new("var hello = yeeehah()\n\0")
+    parser.konaScan()
+    Assert.ok(true)
     parser.spitTokens()
+  }
+  
+  it.should("parse names") {
+    var parser = Parser.new("var hello = yeeehah()\n\0")
+    parser.konaScan()
+    Assert[parser.tokens[0]["value"] == "var"]
+    Assert[parser.tokens[2]["value"] == "hello"]
+    Assert[parser.tokens[6]["value"] == "yeeehah"]
   }
 
   //it.should("parse a simple line") {

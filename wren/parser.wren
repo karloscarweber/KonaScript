@@ -192,8 +192,7 @@ class Token {
   }
   static new() { new(null,null,null,null,null)}
   static toString(token) {
-    var tokenthing = TK[token["type"]]
-    return "%(tokenthing) %(token["start"])..%(token["length"])::%(token["line"]) = %(token["value"]) "
+    return "%(TK[token["type"]]) %(token["start"])[%(token["length"])]:%(token["line"]) = %(token["value"]) "
   }
 }
 
@@ -228,6 +227,20 @@ var digitCharacters = ["0","1","2","3","4","5","6","7","8","9",]
 
 // static function container for stuff
 class Isa {
+  
+  static nameCharacters { 
+    if (__nameCharacters) return __nameCharacters
+    __nameCharacters = [
+     "a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z",
+     "A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","A","A","Z",
+     "_"]
+     return __nameCharacters
+  }
+  static digitCharacters {
+    if (__digitCharacters) return __digitCharacters
+    __digitCharacters = ["0","1","2","3","4","5","6","7","8","9",]
+     return __digitCharacters 
+  }
  
  // acceptable end characters
  static name(c)  { nameCharacters.contains(c) }
@@ -301,6 +314,7 @@ class Parser {
     }
 
   }
+  
 
   // nameOrKeyword
   // adds a nameOrKeyword token to the list of tokens
@@ -362,6 +376,9 @@ class Parser {
     }
     return _source[_current+step.._current+step]
   }
+  
+  
+  
 
 
   // makeToken(_)
@@ -370,18 +387,18 @@ class Parser {
   // the way the parser works is that it sets the parser's current token
   // to this.
   makeToken(type, value) {
-    var tk = Token.new()
-    tk["type"] = type
-    tk["start"] = _tokenStart
-    tk["length"] = currentTokenLength
-    tk["line"] = _currentLine
-    tk["value"] = value
+    var token = Token.new()
+    token["type"] = type
+    token["start"] = _tokenStart
+    token["length"] = currentTokenLength
+    token["line"] = _currentLine
+    token["value"] = value
     
     // forces newlines to appear on the line they appear.
     // otherwise they would be on the next line.
-    if (type == TK.LINE) tk.line = tk.line - 1
-    tokens.add(tk)
-    return tk
+    if (type == TK.LINE) token.line = token.line - 1
+    tokens.add(token)
+    return token
   }
   
   // for when we don't have values for a token
@@ -446,6 +463,15 @@ class Parser {
         break
       } else if (c == "]") {
         makeToken(TK.RIGHT_BRACKET)
+        break
+      } else if (Isa.name(c)) {
+        // If this could be a name, or the character coulde be part of the name.
+        
+        // This block should be moved to a function that grabs all the charac-
+        // ters for the name and adds the token. Doing it here for brevity
+        // and simplicity first.
+        while (Isa.name(peekChar())) nextChar()
+        makeToken(TK.NAME, currentLexeme)
         break
       } else {
         // catch all other tokens as null token for now.
@@ -529,13 +555,27 @@ class Parser {
     nextToken()
     return true
   }
+  
+  // isWhitespace
+  // returns true if the peeked token is whitespace
+  isWhitespace() {
+    var c = peek()
+    if (c==" "||c=="/r"||c=="/t"||c=="/n") {
+      return true
+    }
+    return false
+  }
+  
+  // isName
+  // Checks to see if the current character is a name
+  isName(c) { Isa.name(c) }
 
   /**
    * Skips the current character and moves on to the next. Used to advance over
    * whitespace.
    */
   skip() { advance() }
-  advance() { _curentPos = _curentPos + 1 }
+  advance() { _currentPos = _currentPos + 1 }
   
   /*
     Accessors
@@ -545,7 +585,7 @@ class Parser {
   source=(value) { _source = value }
   tokens { _tokens }
   currentChar { currentChar(0) } // current character
-  currentLexeme { source[_tokenStart.._currentPos - 1] }
+  currentLexeme { source[_tokenStart..(_currentPos - 1)] }
   
   /*
     Constructors
@@ -558,10 +598,10 @@ class Parser {
   konaScan() {    
     // setup state
     _module = "Main"
-    _source = "var hello = yeeehah()\n\0"
+    
     // Add a null terminator if it's not there.
     // We need to do this because Strings in Wren don't have null terminators.
-    // that's a C thing.
+    // that's a C thing. And we need that C thing.
     if (_source[_source.count - 1] != "\0") _source = _source + "\0"
     
     // we're storing tokens in our parser because it's a trial run of the real thing
@@ -662,155 +702,3 @@ class Parser {
     }
   }
 }
-
-
-// Various Definitions
-// TokenType...struct
-// Token...struct
-// Parser...struct
-// Local...struct
-// CompilerUpvalue...struct
-// Loop...struct
-// SignatureType...struct
-// Signature...struct
-// ClassInfo...struct
-// sCompiler...struct
-// scope struct
-// variable struct
-// stackEffects()
-// printError()
-// lexError()
-// error()
-// addConstant()
-// initCompiler()
-// keyword struct
-// keywords...
-// isName()
-// isDigit()
-// peekChar()
-// peekNextChar()
-// nextChar()
-// matchChar()
-// makeToken()
-// twoCharToken()
-// skipLineComment()
-// skipBlockComment()
-// readHexDigit()
-// makeNumber()
-// readHexNumber()
-// readNumber()
-// readName()
-// readHexEscape()
-// readUnicodeEscape()
-// readRawString()
-// readString()
-// nextToken()
-// peek()
-// peekNext()
-// match()
-// consume()
-// matchLine()
-// ignoreNewlines()
-// consumeLine()
-// allowLineBeforeDot()
-// emitByte()
-// emitOp()
-// emitShort()
-// emitByteArg()
-// emitShortArg()
-// emitJump()
-// emitConstant()
-// addLocal()
-// declareVariable()
-// declareNamedVariable()
-// defineVariable()
-// pushScope()
-// discardLocals()
-// popScope()
-// resolveLocal()
-// addUpvalue()
-// findUpvalue()
-// resolveNonmodule()
-// resolveName()
-// loadLocal()
-// endCompiler()
-// patchJump()
-// finishBlock()
-// finishBody()
-// validateNumParameters()
-// finishParameterList()
-// methodSymbol()
-// signatureParameterList()
-// signatureToString()
-// signatureSymbol()
-// signatureFromToken()
-// finishArgumentList()
-// callSignature()
-// callMethod()
-// methodCall()
-// namedCall()
-// loadVariable()
-// loadThis()
-// loadCoreVariable()
-// grouping()
-// list()
-// map()
-// unaryOp()
-// boolean()
-// getEnclosingClassCompiler()
-// getEnclosingClass()
-// field()
-// bareName()
-// staticField()
-// name()
-// null()
-// literal()
-// stringInterpolation()
-// super_()
-// this_()
-// subscript()
-// call()
-// and_()
-// or_()
-// conditional()
-// infixOp()
-// infixSignature()
-// unarySignature()
-// mixedSignature()
-// maybeSetter()
-// subscriptSignature()
-// parameterList()
-// namedSignature()
-// constructorSignature()
-// getRule()
-// parsePrecedence()
-// expression()
-// getByteCountForArguments()
-// startLoop()
-// testExitLoop()
-// loopBody()
-// endLoop()
-// forStatement()
-// ifStatement()
-// whileStatement()
-// statement()
-// createConstructor()
-// defineMethod()
-// declareMethod()
-// consumeLiteral()
-// matchAttribute()
-// method()
-// classDefinition()
-// import()
-// variableDefinition()
-// definition()
-// wrenCompile()
-// wrenBindMethodCode()
-// wrenMarkCompiler()
-// disallowAttributes()
-// addToAttributeGroup()
-// emitAttributes()
-// emitAttributeMethods()
-// emitClassAttributes()
-// copyAttributes()
-// copyMethodAttributes()
