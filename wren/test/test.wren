@@ -3,7 +3,7 @@ import "../modules/wren-testie/testie" for Testie
 import "../modules/wren-assert/Assert" for Assert
 
 import "../kona" for Kona
-import "../parser" for Tokens
+import "../parser" for Tokens, Isa
 
 var Parser = Kona.Parser
 
@@ -149,41 +149,41 @@ var suite = Testie.new("Compiler class should:") {|it, skip|
 //    Assert[s.isAlphaNumeric("j")]
 //  }
 //
-//  it.should("isDigit(): guard against digits properly") {
-//    var s = Parser.new()
-//    Assert.notOk(s.isDigit("A"))
-//    Assert[s.isDigit("1")]
-//    Assert[s.isDigit("2")]
-//    Assert[s.isDigit("3")]
-//    Assert[s.isDigit("4")]
-//    Assert[s.isDigit("5")]
-//    Assert[s.isDigit("6")]
-//    Assert[s.isDigit("7")]
-//    Assert[s.isDigit("8")]
-//    Assert[s.isDigit("9")]
-//  }
-//
-//  it.should("number(): capture numbers properly") {
-//    var s = Parser.new("var 99.65")
-//    s.scanTokens()
-//    var tok = s.tokens[1]
-//
-//    // Make certain that the lexeme that we're capturing for a number is the
-//    // right size.
-//    var ll = tok.lexeme.count
-//    Assert[ll, 5, "\"%(tok.lexeme)\"(%(ll)) Lexeme expected to be 5 characters long."]
-//
-//    // Check that the first token is of the proper type code.
-//    Assert[tok.type, "NUMBER", "\"%(tok.type)\" Token expected to be a \"NUMBER\". Lexeme: %(tok.lexeme)"]
-//    // var keywords don't have literals, so this should be empty.
-//    Assert[tok.literal, "", "\"%(tok.literal)\" expected to be \"whatever\"."]
-//
-//    var d = Parser.new("var 20030")
-//    d.scanTokens()
-//    var tok2 = d.tokens[1]
-//
-//    Assert[tok2.literal]
-//  }
+ it.should("isDigit(): guard against digits properly") {
+   //var s = Parser.new()
+   Assert.notOk(Isa.digit("A"))
+   Assert[Isa.digit("1")]
+   Assert[Isa.digit("2")]
+   Assert[Isa.digit("3")]
+   Assert[Isa.digit("4")]
+   Assert[Isa.digit("5")]
+   Assert[Isa.digit("6")]
+   Assert[Isa.digit("7")]
+   Assert[Isa.digit("8")]
+   Assert[Isa.digit("9")]
+ }
+
+ it.should("number(): capture numbers properly") {
+   var s = Parser.new("var 99.65")
+   s.konaScan()
+   var tok = s.tokens[1]
+
+   //// Make certain that the lexeme that we're capturing for a number is the
+   //// right size.
+   //var ll = tok.lexeme.count
+   //Assert[ll, 5, "\"%(tok.lexeme)\"(%(ll)) Lexeme expected to be 5 characters long."]
+
+   // Check that the first token is of the proper type code.
+   //Assert[tok.type, "NUMBER", "\"%(tok.type)\" Token expected to be a \"NUMBER\". Lexeme: %(tok.lexeme)"]
+   // var keywords don't have literals, so this should be empty.
+   //Assert[tok.literal, "", "\"%(tok.literal)\" expected to be \"whatever\"."]
+
+   var d = Parser.new("var 20030")
+   d.konaScan()
+   var tok2 = d.tokens[1]
+
+   Assert[tok2.literal]
+ }
 //
 //  it.should("skip white space, tabs and spaces, appropriately") {
 //    var s = Parser.new("var identifier")
