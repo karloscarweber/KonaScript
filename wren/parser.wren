@@ -463,7 +463,6 @@ class Parser {
           //readString() // fill this in soon
           break
         }
-
         makeToken(TK.RIGHT_PAREN)
         break
       } else if (c == "{") {
@@ -478,8 +477,63 @@ class Parser {
       } else if (c == "]") {
         makeToken(TK.RIGHT_BRACKET)
         break
-      } else if (Isa.name(c)) {
+      } else if (c == ",") {
+        makeToken(TK.COMMA)
+        break
+      } else if (c == ".") {
+      
+        if (peekChar() == ".") {
+          nextChar()
+          if (peekChar() == ".") {
+            nextChar()
+            makeToken(TK.DOT_DOT_DOT)
+            break
+          }
+          makeToken(TK.DOT_DOT)
+          break
+        }
+        makeToken(TK.DOT)
+        break
+      
+        //// This block should be moved to a function that grabs all the charac-
+        //// ters for the name and adds the token. Doing it here for brevity
+        //// and simplicity first.
+        //while (Isa.name(peekChar())) nextChar()
+        //var cl = currentLexeme
+        //
+        //if (TK.get(cl)) {
+        //  makeToken(TK.get(cl), cl)
+        //} else {
+        //  makeToken(TK.NAME, cl)  
+        //}
+        //break
+      
+      
+      
+        //if (peekChar(c)) {
+        //  if (peekNextChar(c)) {
+        //    addToken(TK.DOTDOTDOT)
+        //    break
+        //  }
+        //  addToken(TK.DOTDOT)
+        //  break
+        //}
+        //makeToken(TK.DOT)
+        //break
         
+        
+        
+        
+      } else if (c == "-") {
+        makeToken(TK.MINUS)
+        break
+      } else if (c == "+") {
+        makeToken(TK.MINUS)
+        break
+      } else if (c == "*") {
+        makeToken(TK.STAR)
+        break
+      } else if (Isa.name(c)) {
         // This block should be moved to a function that grabs all the charac-
         // ters for the name and adds the token. Doing it here for brevity
         // and simplicity first.
@@ -504,14 +558,6 @@ class Parser {
         break
       }
       
-      //} else  if (c == "[") { makeToken("[")
-      //} else  if (c == "]") { makeToken("]")
-      //} else  if (c == ",") { makeToken(",")
-      //} else  if (c == ".") { makeToken(".")
-      //} else  if (c == "-") { makeToken("-")
-      //} else  if (c == "+") { makeToken("+")
-      //} else  if (c == ";") { makeToken(";")
-      //} else  if (c == "*") { makeToken("*")
       //}
       // } else  if (c == "!") {
       //   if (match("=") == true) { addToken("!=") } else {  addToken("!") }
@@ -529,12 +575,6 @@ class Parser {
       //   } else {
       //     addToken("/")
       //   }
-      // } else  if (c == " ")  {
-      //   // We do nothing here to fall through scanner.
-      //   // If we're not at the end, the scanner will start over at the next
-      //   // character.
-      // } else  if (c == "/r") { /* Do Nothing */
-      // } else  if (c == "/t") { /* Do Nothing */
       // } else  if (c == "\"") { /*"*/
       //   // We call the special string method to figure out what to do.
       //   string()
