@@ -68,48 +68,47 @@ class Tokens {
   static CARAT { 21 }
   static POUND { 22 }
   static AND { 23 }
-  static AND_AND { 24 }
-  static PIPE { 25 }
-  static QUESTION { 26 }
-  static COLON { 27 }
-  static SNAIL { 28 }
-  static LESS_LESS { 29 }
-  static GREATER_GREATER { 30 }
-  static DOT_DOT { 31 }
-  static DOT_DOT_DOT { 32 }
-  static STAR_STAR { 33 }
+  static PIPE { 24 }
+  static QUESTION { 25 }
+  static COLON { 26 }
+  static SNAIL { 27 }
+  static LESS_LESS { 28 }
+  static GREATER_GREATER { 29 }
+  static DOT_DOT { 30 }
+  static DOT_DOT_DOT { 31 }
+  static STAR_STAR { 32 }
   // KEYWORDS AND STUFF
-  static AS  { 34 }
-  static BREAK  { 35 }
-  static CLASS  { 36 }
-  static CONSTRUCT  { 37 }
-  static CONTINUE  { 38 }
-  static ELSE  { 39 }
-  static FALSE  { 40 }
-  static FOR  { 41 }
-  static FOREIGN  { 42 }
-  static IF  { 43 }
-  static IMPORT  { 44 }
-  static IN  { 45 }
-  static IS  { 46 }
-  static NULL  { 47 }
-  static RETURN  { 48 }
-  static REQUIRE  { 49 }
-  static STATIC  { 50 }
-  static SUPER  { 51 }
-  static THIS  { 52 }
-  static TRUE  { 53 }
-  static VAR  { 54 }
-  static WHILE  { 55 }
-  static FIELD  { 56 }
-  static STATIC_FIELD  { 57 }
-  static NAME  { 58 }
-  static NUMBER  { 59 }
-  static STRING { 60 }
-  static INTERPOLATION { 61 }
-  static LINE { 62 }
-  static ERROR { 63 }
-  static EOF  { 64 }
+  static AS  { 33 }
+  static BREAK  { 34 }
+  static CLASS  { 35 }
+  static CONSTRUCT  { 36 }
+  static CONTINUE  { 37 }
+  static ELSE  { 38 }
+  static FALSE  { 39 }
+  static FOR  { 40 }
+  static FOREIGN  { 41 }
+  static IF  { 42 }
+  static IMPORT  { 43 }
+  static IN  { 44 }
+  static IS  { 45 }
+  static NULL  { 46 }
+  static RETURN  { 47 }
+  static REQUIRE  { 48 }
+  static STATIC  { 49 }
+  static SUPER  { 50 }
+  static THIS  { 51 }
+  static TRUE  { 52 }
+  static VAR  { 53 }
+  static WHILE  { 54 }
+  static FIELD  { 55 }
+  static STATIC_FIELD  { 56 }
+  static NAME  { 57 }
+  static NUMBER  { 58 }
+  static STRING { 59 }
+  static INTERPOLATION { 60 }
+  static LINE { 61 }
+  static ERROR { 62 }
+  static EOF  { 63 }
 }
 var TK = Tokens
 TK.add("(")              //        "LEFT_PAREN",
@@ -136,7 +135,6 @@ TK.add("\%")             //            "MODULO",
 TK.add("^")              //             "CARAT",
 TK.add("#")              //             "POUND",
 TK.add("&")              //               "AND",
-TK.add("&&")             //           "AND_AND",
 TK.add("|")              //              "PIPE",
 TK.add("?")              //          "QUESTION",
 TK.add(":")              //             "COLON",
