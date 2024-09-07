@@ -74,6 +74,17 @@ var suite = Testie.new("Compiler class should:") {|it, skip|
     Assert[pt[1]["type"], TK.DOT_DOT, "was actually: %(pt[1]["type"])"]
     Assert[pt[2]["type"], TK.DOT_DOT_DOT, "was actually: %(pt[2]["type"])"]
   }
+  
+  it.should("parse the star star") {
+    var parser = Parser.new("* **  \0")
+  parser.konaScan()
+  //parser.spitTokens()
+  var pt = parser.tokens
+  var TK = Tokens
+  
+  Assert[pt[0]["type"], TK.STAR, "was actually: %(pt[0]["type"])"]
+  Assert[pt[1]["type"], TK.STAR_STAR, "was actually: %(pt[1]["type"])"]
+  }
 
   //it.should("parse a simple line") {
   //  var scanner = Parser.new("thing = \"whatever\"")

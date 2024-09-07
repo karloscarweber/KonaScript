@@ -489,6 +489,11 @@ class Parser {
       } else if (c == "+") {
         makeToken(TK.MINUS)
       } else if (c == "*") {
+        if (peekChar() == "*") {
+          nextChar()
+          makeToken(TK.STAR_STAR)
+          break
+        }
         makeToken(TK.STAR)
       } else if (Isa.name(c)) {
         // This block should be moved to a function that grabs all the charac-
