@@ -45,7 +45,7 @@ To get KONA bootstrapped and built with the basics we're going for a reduced set
 ## Reserved words
 we're changing the reserved words list to be greatly reduced and to match the words reserved in Wren. We want to add a few reserved words of our own to add the pieces we want. But for now let's just keep it simple.
 ```
-as break class construct continue else false for foreign if import in is null return require static super this true var while
+and as break class construct continue else false for foreign if import in is null return require static super this true var while
 ```
 
 ## Symbol tokens

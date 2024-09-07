@@ -32,7 +32,7 @@ var suite = Testie.new("Compiler class should:") {|it, skip|
   }
   
   it.should("parse keywords") {
-    var parser = Parser.new("as break class construct continue else false for foreign if import in is null return require static super this true var while \0")
+    var parser = Parser.new("as break class construct continue else false for foreign if import in is null return require static super this true var while and \0")
     parser.konaScan()
     //parser.spitTokens()
     var pt = parser.tokens
@@ -60,6 +60,7 @@ var suite = Testie.new("Compiler class should:") {|it, skip|
     Assert[pt[19]["type"], TK.get("true"), "was actually: %(pt[19]["type"])"]
     Assert[pt[20]["type"], TK.get("var"), "was actually: %(pt[20]["type"])"]
     Assert[pt[21]["type"], TK.get("while"), "was actually: %(pt[21]["type"])"]
+    Assert[pt[22]["type"], TK.get("and"), "was actually: %(pt[22]["type"])"]
     
   }
   
