@@ -101,7 +101,7 @@ var suite = Testie.new("Compiler class should:") {|it, skip|
   }
   
   it.should("parse the symbols") {
-    var parser = Parser.new("- + \% ^ # @ | \0")
+    var parser = Parser.new("- + \% ^ # @ | , / \0")
     parser.konaScan()
     //parser.spitTokens()
     var pt = parser.tokens
@@ -114,7 +114,8 @@ var suite = Testie.new("Compiler class should:") {|it, skip|
     Assert[pt[4]["type"], TK.POUND, "was actually: %(pt[4]["type"])"]
     Assert[pt[5]["type"], TK.SNAIL, "was actually: %(pt[5]["type"])"]
     Assert[pt[6]["type"], TK.PIPE, "was actually: %(pt[6]["type"])"]
-    //Assert[pt[7]["type"], TK.PIPE_PIPE, "was actually: %(pt[7]["type"])"]
+    Assert[pt[7]["type"], TK.COMMA, "was actually: %(pt[7]["type"])"]
+    Assert[pt[8]["type"], TK.SLASH, "was actually: %(pt[8]["type"])"]
   }
 
   //it.should("parse a simple line") {
