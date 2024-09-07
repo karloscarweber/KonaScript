@@ -554,6 +554,13 @@ class Parser {
       } else if (c == "/") {
         // TODO: Add logic for single line comments using //
         makeToken(TK.SLASH)
+      } else if (c == "&") {
+        if (peekChar() == "&") {
+          nextChar()
+          makeToken(TK.AND_AND)
+          break
+        }
+        makeToken(TK.AND)
       } else if (Isa.name(c)) {
         // This block should be moved to a function that grabs all the charac-
         // ters for the name and adds the token. Doing it here for brevity
