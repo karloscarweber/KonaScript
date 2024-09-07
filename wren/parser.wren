@@ -453,7 +453,6 @@ class Parser {
         // unmatched '(' when we're in an interpolated expression
         if (_numParens > 0) parens[_numParens - 1] = parens[_numParens - 1] + 1
         makeToken(TK.LEFT_PAREN)
-        break
       } else  if (c == ")") {
         // If we're interpolating, then count the ')'
         if (_numParens > 0 && ((parens[_numParens - 1]) - 1) == 0) {
@@ -461,27 +460,19 @@ class Parser {
           // now begins next portion of the template string
           _numParens = _numParens - 1
           //readString() // fill this in soon
-          break
         }
         makeToken(TK.RIGHT_PAREN)
-        break
       } else if (c == "{") {
         makeToken(TK.LEFT_BRACE)
-        break
       } else if (c == "}") {
         makeToken(TK.RIGHT_BRACE)
-        break
       } else if (c == "[") {
         makeToken(TK.LEFT_BRACKET)
-        break
       } else if (c == "]") {
         makeToken(TK.RIGHT_BRACKET)
-        break
       } else if (c == ",") {
         makeToken(TK.COMMA)
-        break
       } else if (c == ".") {
-      
         if (peekChar() == ".") {
           nextChar()
           if (peekChar() == ".") {
@@ -493,46 +484,12 @@ class Parser {
           break
         }
         makeToken(TK.DOT)
-        break
-      
-        //// This block should be moved to a function that grabs all the charac-
-        //// ters for the name and adds the token. Doing it here for brevity
-        //// and simplicity first.
-        //while (Isa.name(peekChar())) nextChar()
-        //var cl = currentLexeme
-        //
-        //if (TK.get(cl)) {
-        //  makeToken(TK.get(cl), cl)
-        //} else {
-        //  makeToken(TK.NAME, cl)  
-        //}
-        //break
-      
-      
-      
-        //if (peekChar(c)) {
-        //  if (peekNextChar(c)) {
-        //    addToken(TK.DOTDOTDOT)
-        //    break
-        //  }
-        //  addToken(TK.DOTDOT)
-        //  break
-        //}
-        //makeToken(TK.DOT)
-        //break
-        
-        
-        
-        
       } else if (c == "-") {
         makeToken(TK.MINUS)
-        break
       } else if (c == "+") {
         makeToken(TK.MINUS)
-        break
       } else if (c == "*") {
         makeToken(TK.STAR)
-        break
       } else if (Isa.name(c)) {
         // This block should be moved to a function that grabs all the charac-
         // ters for the name and adds the token. Doing it here for brevity
@@ -545,17 +502,13 @@ class Parser {
         } else {
           makeToken(TK.NAME, cl)  
         }
-        break
       } else if (Isa.whitespace(c)) {
         // do nothing
-        break
       } else if (Isa.newline(c)) {
         makeToken(TK.LINE)
-        break
       } else {
         // catch all other tokens as null token for now.
         makeToken(TK.NULL)
-        break
       }
       
       //}
