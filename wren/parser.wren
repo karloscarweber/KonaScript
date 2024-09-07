@@ -256,6 +256,14 @@ class Isa {
  // checks to see if the supplied character is alphanumeric and can include
  // an underscore. It's silly, I know.
  static digiNameric(c) { name(c) || digit(c) }
+ 
+ // newline(_)
+ // retruns true if supplied character is a new line.
+ static newline(c) { c=="\n" }
+ 
+ // returns true if c is whitespace but not a newline.
+ static whitespace(c) { (c==" "||c=="/r"||c=="/t") }
+
 }
 
 // An attempt to write a parser in wren for fun.
@@ -399,7 +407,7 @@ class Parser {
     
     // forces newlines to appear on the line they appear.
     // otherwise they would be on the next line.
-    if (type == TK.LINE) token.line = token.line - 1
+    if (type == TK.LINE) token["line"] = token["line"] - 1
     tokens.add(token)
     return token
   }
@@ -483,6 +491,12 @@ class Parser {
         } else {
           makeToken(TK.NAME, cl)  
         }
+        break
+      } else if (Isa.whitespace(c)) {
+        // do nothing
+        break
+      } else if (Isa.newline(c)) {
+        makeToken(TK.LINE)
         break
       } else {
         // catch all other tokens as null token for now.
