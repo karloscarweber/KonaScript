@@ -509,6 +509,32 @@ class Parser {
           break
         }
         makeToken(TK.EQUAL)
+      } else if (c == "<") {
+      
+        if (peekChar() == "<") {
+          nextChar()
+          makeToken(TK.LESS_LESS)
+          break
+        } else if (peekChar() == "=") {
+          nextChar()
+          makeToken(TK.LESS_EQUAL)
+          break
+        }
+        
+        makeToken(TK.LESS)
+      } else if (c == ">") {
+        
+        if (peekChar() == ">") {
+          nextChar()
+          makeToken(TK.GREATER_GREATER)
+          break
+        } else if (peekChar() == "=") {
+          nextChar()
+          makeToken(TK.GREATER_EQUAL)
+          break
+        }
+        
+        makeToken(TK.GREATER)
       } else if (Isa.name(c)) {
         // This block should be moved to a function that grabs all the charac-
         // ters for the name and adds the token. Doing it here for brevity

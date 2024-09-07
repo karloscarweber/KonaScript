@@ -76,7 +76,7 @@ var suite = Testie.new("Compiler class should:") {|it, skip|
   }
   
   it.should("parse the Doubles") {
-    var parser = Parser.new("* ** ! != = ==  \0")
+    var parser = Parser.new("* ** ! != = == < << <= > >> >= \0")
     parser.konaScan()
     //parser.spitTokens()
     var pt = parser.tokens
@@ -91,8 +91,14 @@ var suite = Testie.new("Compiler class should:") {|it, skip|
     Assert[pt[4]["type"], TK.EQUAL, "was actually: %(pt[4]["type"])"]
     Assert[pt[5]["type"], TK.EQUAL_EQUAL, "was actually: %(pt[5]["type"])"]
     
-    //Assert[pt[6]["type"], TK.STAR, "was actually: %(pt[6]["type"])"]
-    //Assert[pt[7]["type"], TK.STAR_STAR, "was actually: %(pt[7]["type"])"]
+    Assert[pt[6]["type"], TK.LESS, "was actually: %(pt[6]["type"])"]
+    Assert[pt[7]["type"], TK.LESS_LESS, "was actually: %(pt[7]["type"])"]
+    Assert[pt[8]["type"], TK.LESS_EQUAL, "was actually: %(pt[8]["type"])"]
+    
+    Assert[pt[9]["type"], TK.GREATER, "was actually: %(pt[9]["type"])"]
+    Assert[pt[10]["type"], TK.GREATER_GREATER, "was actually: %(pt[10]["type"])"]
+    Assert[pt[11]["type"], TK.GREATER_EQUAL, "was actually: %(pt[11]["type"])"]
+    
   }
 
   //it.should("parse a simple line") {
