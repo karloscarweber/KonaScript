@@ -554,6 +554,10 @@ class Parser {
       } else if (c == "/") {
         // TODO: Add logic for single line comments using //
         makeToken(TK.SLASH)
+      } else if (c == "?") {
+        makeToken(TK.QUESTION)
+      } else if (c == ":") {
+        makeToken(TK.COLON)
       } else if (c == "&") {
         if (peekChar() == "&") {
           nextChar()
