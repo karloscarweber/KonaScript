@@ -487,7 +487,15 @@ class Parser {
       } else if (c == "-") {
         makeToken(TK.MINUS)
       } else if (c == "+") {
-        makeToken(TK.MINUS)
+        makeToken(TK.PLUS)
+      } else if (c == "\%") {
+        makeToken(TK.MODULO)
+      } else if (c == "^") {
+        makeToken(TK.CARAT)
+      } else if (c == "#") {
+        makeToken(TK.POUND)
+      } else if (c == "@") {
+        makeToken(TK.SNAIL)
       } else if (c == "*") {
         if (peekChar() == "*") {
           nextChar()
