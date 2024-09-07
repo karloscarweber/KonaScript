@@ -496,6 +496,14 @@ class Parser {
         makeToken(TK.POUND)
       } else if (c == "@") {
         makeToken(TK.SNAIL)
+      } else if (c == "|") {
+        // TODO: Add PIPE_PIPE, or just use or.
+        //if (peekChar() == "|") {
+        //  nextChar()
+        //  makeToken(TK.PIPE_PIPE)
+        //  break
+        //}
+        makeToken(TK.PIPE)
       } else if (c == "*") {
         if (peekChar() == "*") {
           nextChar()
