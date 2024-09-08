@@ -2,8 +2,11 @@
 
 default:
 	cd clox
-	clang -o clox/main clox/main.c clox/chunk.c clox/memory.c clox/debug.c clox/value.c clox/vm.c clox/compiler.c clox/scanner.c clox/object.c clox/table.c
+	clang -o clox/main clox/main.c clox/chunk.c clox/memory.c clox/debug.c clox/value.c
 	./clox/main
+
+#	cd clox
+#	clang -o clox/main clox/main.c clox/chunk.c clox/memory.c clox/debug.c clox/value.c clox/vm.c clox/compiler.c clox/scanner.c clox/object.c clox/table.c
 
 olddefault:
 	lua main.lua
