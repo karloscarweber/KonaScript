@@ -5,6 +5,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define DEBUG_TRACE_EXECUTION
+// Debug and trace execution flags.
+#define DEBUG_PRINT_CODE_
+#define DEBUG_TRACE_EXECUTION_
 
 #endif
