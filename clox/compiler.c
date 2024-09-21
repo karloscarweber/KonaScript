@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "compiler.h"
+#include "object.h"
 #include "scanner.h"
 
 #ifdef DEBUG_PRINT_CODE
