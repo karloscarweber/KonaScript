@@ -7,6 +7,6 @@
 
 // Debug and trace execution flags.
 #define DEBUG_PRINT_CODE
-#define DEBUG_TRACE_EXECUTION_
+#define DEBUG_TRACE_EXECUTION
 
 #endif
