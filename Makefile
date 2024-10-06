@@ -1,5 +1,7 @@
 .PHONY: kona
 
+# You may get a build error without `export MACOSX_DEPLOYMENT_TARGET=14.06`
+# if so, export that shit.
 default:
 	cd clox
 	clang -o clox/main clox/main.c clox/chunk.c clox/memory.c clox/debug.c clox/value.c clox/vm.c clox/compiler.c clox/scanner.c clox/object.c clox/table.c
