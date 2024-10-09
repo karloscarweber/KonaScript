@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "compiler.h"
-#include "object.h"
+#include "memory.h"
 #include "scanner.h"
 
 #ifdef DEBUG_PRINT_CODE
@@ -241,6 +241,7 @@ static void statement();
 static void declaration();
 static ParseRule* getRule(TokenType type);
 static void parsePrecedence(Precedence precedence);
+static uint8_t argumentList();
 
 static void binary(bool canAssign) {
 	TokenType operatorType = parser.previous.type;
@@ -783,4 +784,12 @@ ObjFunction* compile(const char* source) {
 	
 	ObjFunction* function = endCompiler();
 	return parser.hadError ? NULL : function;
+}
+
+void markCompilerRoots() {
+	Compiler* compiler = current;
+	while (compiler != NULL) {
+		markObject((Obj*)compiler->function);
+		compiler = compiler->enclosing;
+	}
 }
