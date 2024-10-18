@@ -5,7 +5,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-// Debug and trace execution flags.
+
+#define NAN_BOXING
 #define DEBUG_PRINT_CODE
 #define DEBUG_TRACE_EXECUTION
 
