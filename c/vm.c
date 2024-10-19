@@ -3,13 +3,12 @@
 #include <string.h>
 #include <time.h>
 
+#include "common.h"
 #include "compiler.h"
+#include "debug.h"
 #include "object.h"
 #include "memory.h"
-#include "table.h"
 #include "vm.h"
-#include "value.h"
-#include "debug.h"
 
 VM vm;
 
@@ -130,9 +129,8 @@ static bool callValue(Value callee, int argCount) {
 				}
 				return true;
 			}
-			case OBJ_CLOSURE: {
+			case OBJ_CLOSURE:
 				return call(AS_CLOSURE(callee), argCount);
-			}
 			case OBJ_NATIVE: {
 				NativeFn native = AS_NATIVE(callee);
 				Value result = native(argCount, vm.stackTop - argCount);
@@ -184,7 +182,6 @@ static bool bindMethod(ObjClass* klass, ObjString* name) {
 	}
 	
 	ObjBoundMethod* bound = newBoundMethod(peek(0), AS_CLOSURE(method));
-	
 	pop();
 	push(OBJ_VAL(bound));
 	return true;
@@ -359,7 +356,6 @@ static InterpretResult run() {
 						push(value);
 						break;
 					}
-					
 					if (!bindMethod(instance->klass, name)) {
 						return INTERPRET_RUNTIME_ERROR;
 					}
@@ -504,28 +500,33 @@ static InterpretResult run() {
 				case OP_CLASS:
 					push(OBJ_VAL(newClass(READ_STRING())));
 					break;
-				case OP_INHERIT:
+				case OP_INHERIT: {
 					Value superclass = peek(1);
 					if (!IS_CLASS(superclass)) {
 						runtimeError("Suerclass must be a class.");
 						return INTERPRET_RUNTIME_ERROR;
 					}
-
 					ObjClass* subclass = AS_CLASS(peek(0));
 					tableAddAll(&AS_CLASS(superclass)->methods, &subclass->methods);
 					pop();
 					break;
+				}
 				case OP_METHOD:
 					defineMethod(READ_STRING());
 					break;
 			}
 		}
 	
-	#undef READ_BYTE
-	#undef READ_SHORT
-	#undef READ_CONSTANT
-	#undef READ_STRING
-	#undef BINARY_OP
+#undef READ_BYTE
+#undef READ_SHORT
+#undef READ_CONSTANT
+#undef READ_STRING
+#undef BINARY_OP
+}
+
+void hack(bool b) {
+	run();
+	if (b) hack(false);
 }
 
 InterpretResult interpret(const char* source) {

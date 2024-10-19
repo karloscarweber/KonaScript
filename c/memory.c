@@ -2,7 +2,6 @@
 
 #include "compiler.h"
 #include "memory.h"
-#include "object.h"
 #include "vm.h"
 
 #ifdef DEBUG_LOG_GC
@@ -96,6 +95,7 @@ static void blackenObject(Obj* object) {
 			ObjFunction* function = (ObjFunction*)object;
 			markObject((Obj*)function->name);
 			markArray(&function->chunk.constants);
+			break;
 		}
 		case OBJ_INSTANCE: {
 			ObjInstance* instance = (ObjInstance*)object;
@@ -138,11 +138,12 @@ static void freeObject(Obj* object) {
 			FREE(ObjFunction, object);
 			break;
 		}
-		case OBJ_INSTANCE:
+		case OBJ_INSTANCE: {
 			ObjInstance* instance = (ObjInstance*)object;
 			freeTable(&instance->fields);
 			FREE(ObjInstance, object);
 			break;
+		}
 		case OBJ_NATIVE:
 			FREE(ObjNative, object);
 			break;
@@ -152,10 +153,9 @@ static void freeObject(Obj* object) {
 			FREE(ObjString, object);
 			break;
 		}
-		case OBJ_UPVALUE: {
+		case OBJ_UPVALUE:
 			FREE(ObjUpvalue, object);
 			break;
-		}
 	}
 }
 
@@ -221,7 +221,9 @@ void collectGarbage() {
 
 #ifdef DEBUG_LOG_GC
 	printf("-- gc end\n");
-	printf("   collected %zu bytes (from %zu to %zu) next at %zu\n", before - vm.bytesAllocated, before, vm.bytesAllocated, vm.nextGC);
+	printf("   collected %zu bytes (from %zu to %zu) next at %zu\n", 
+					before - vm.bytesAllocated, before, vm.bytesAllocated, 
+					vm.nextGC);
 #endif
 }
 

@@ -3,7 +3,6 @@
 
 #include "object.h"
 #include "table.h"
-#include "chunk.h"
 #include "value.h"
 
 #define FRAMES_MAX 64
@@ -18,7 +17,6 @@ typedef struct {
 typedef struct {
 	CallFrame frames[FRAMES_MAX];
 	int frameCount;
-	
 	Value stack[STACK_MAX];
 	Value* stackTop;
 	Table globals;

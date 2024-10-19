@@ -15,12 +15,13 @@ static Obj* allocateObject(size_t size, ObjType type) {
 	object->type = type;
 	object->isMarked = false;
 	
-#ifdef DEBUG_LOG_GC
-	printf("%p allocate %zu for %d\n", (void*)object, size, type);
-#endif
-	
 	object->next = vm.objects;
 	vm.objects = object;
+	
+	#ifdef DEBUG_LOG_GC
+		printf("%p allocate %zu for %d\n", (void*)object, size, type);
+	#endif
+	
 	return object;
 }
 
@@ -40,7 +41,6 @@ ObjClass* newClass(ObjString* name) {
 
 ObjClosure* newClosure(ObjFunction* function) {
 	ObjUpvalue** upvalues = ALLOCATE(ObjUpvalue*, function->upvalueCount);
-	
 	for (int i = 0; i < function->upvalueCount; i++) {
 		upvalues[i] = NULL;
 	}

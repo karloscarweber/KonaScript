@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "common.h"
 #include "compiler.h"
 #include "memory.h"
 #include "scanner.h"
@@ -74,7 +75,6 @@ typedef struct ClassCompiler {
 } ClassCompiler;
 
 Parser parser;
-Chunk* compilingChunk;
 Compiler* current = NULL;
 ClassCompiler* currentClass = NULL;
 
@@ -169,6 +169,7 @@ static void emitReturn() {
 	} else {
 		emitByte(OP_NIL);
 	}
+	
 	emitByte(OP_RETURN);
 }
 
@@ -468,7 +469,8 @@ static void or_(bool canAssign) {
 }
 
 static void string(bool canAssign) {
-	emitConstant(OBJ_VAL(copyString(parser.previous.start + 1, parser.previous.length - 2)));
+	emitConstant(OBJ_VAL(copyString(parser.previous.start + 1, 
+																	parser.previous.length - 2)));
 }
 
 static void namedVariable(Token name, bool canAssign) {
@@ -608,6 +610,7 @@ static void parsePrecedence(Precedence precedence) {
 	while (precedence <= getRule(parser.current.type)->precedence) {
 		advance();
 		ParseFn infixRule = getRule(parser.previous.type)->infix;
+		
 		infixRule(canAssign);
 	}
 	
@@ -669,6 +672,7 @@ static void method() {
 	if (parser.previous.length == 4 && memcmp(parser.previous.start, "init", 4) == 0) {
 		type = TYPE_INITIALIZER;
 	}
+	
 	function(type);
 	emitBytes(OP_METHOD, constant);
 }
@@ -690,18 +694,19 @@ static void classDeclaration() {
 	if (match(TOKEN_LESS)) {
 		consume(TOKEN_IDENTIFIER, "Expect superclass name.");
 		variable(false);
+		
+		if (identifiersEqual(&className, &parser.previous)) {
+			error("A class can't inherit from itself.");
+		}
+		
+		beginScope();
+		addLocal(syntheticToken("super"));
+		defineVariable(0);
+		
 		namedVariable(className, false);
 		emitByte(OP_INHERIT);
 		classCompiler.hasSuperclass = true;
 	}
-	
-	if (identifiersEqual(&className, &parser.previous)) {
-		error("A class can't inherit from itself.");
-	}
-	
-	beginScope();
-	addLocal(syntheticToken("super"));
-	defineVariable(0);
 	
 	namedVariable(className, false);
 	consume(TOKEN_LEFT_BRACE, "Expect '{' before class body.");
