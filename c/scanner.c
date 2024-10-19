@@ -12,7 +12,7 @@ typedef struct {
 
 Scanner scanner;
 
-void initScanner(const char* source)  {
+void initScanner(const char* source) {
 	scanner.start = source;
 	scanner.current = source;
 	scanner.line = 1;
@@ -21,7 +21,7 @@ void initScanner(const char* source)  {
 static bool isAlpha(char c) {
 	return (c >= 'a' && c <= 'z') ||
 				 (c >= 'A' && c <= 'Z') ||
-				  c == '_';
+					c == '_';
 }
 
 static bool isDigit(char c) {
@@ -86,7 +86,7 @@ static void skipWhitespace() {
 				break;
 			case '/':
 				if (peekNext() == '/') {
-					// A comment goes until the end of the line;
+					// A comment goes until the end of the line.
 					while (peek() != '\n' && !isAtEnd()) advance();
 				} else {
 					return;
@@ -102,7 +102,7 @@ static TokenType checkKeyword(int start, int length, const char* rest, TokenType
 	if (scanner.current - scanner.start == start + length && memcmp(scanner.start + start, rest, length) == 0) {
 		return type;
 	}
-	
+
 	return TOKEN_IDENTIFIER;
 }
 
@@ -148,15 +148,15 @@ static Token identifier() {
 
 static Token number() {
 	while (isDigit(peek())) advance();
-	
+
 	// Look for a fractional part.
 	if (peek() == '.' && isDigit(peekNext())) {
-		// Consume the "."
+		// Consume the ".".
 		advance();
-		
+
 		while (isDigit(peek())) advance();
 	}
-	
+
 	return makeToken(TOKEN_NUMBER);
 }
 
@@ -165,10 +165,10 @@ static Token string() {
 		if (peek() == '\n') scanner.line++;
 		advance();
 	}
-	
+
 	if (isAtEnd()) return errorToken("Unterminated string.");
-	
-	// the closing quote.
+
+	// The closing quote.
 	advance();
 	return makeToken(TOKEN_STRING);
 }
@@ -176,13 +176,13 @@ static Token string() {
 Token scanToken() {
 	skipWhitespace();
 	scanner.start = scanner.current;
-	
+
 	if (isAtEnd()) return makeToken(TOKEN_EOF);
 	
 	char c = advance();
 	if (isAlpha(c)) return identifier();
 	if (isDigit(c)) return number();
-	
+
 	switch (c) {
 		case '(': return makeToken(TOKEN_LEFT_PAREN);
 		case ')': return makeToken(TOKEN_RIGHT_PAREN);
