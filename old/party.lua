@@ -3,7 +3,6 @@
 -- figure out some builder stuff
 
 -- makes a string with a metatable of type String.
-String_metatable = {}
 String_metatable = {
   __index = function(tab, key)
     if key == 'type' then
