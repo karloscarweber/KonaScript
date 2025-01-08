@@ -1,5 +1,5 @@
-#ifndef clox_value_h
-#define clox_value_h
+#ifndef kona_value_h
+#define kona_value_h
 
 #include <string.h>
 
@@ -19,9 +19,9 @@ typedef struct ObjString ObjString;
 
 typedef uint64_t Value;
 
-#define IS_BOOL(value)    (((value) | 1) == TRUE_VAL)
-#define IS_NIL(value)     ((value) == NIL_VAL)
-#define IS_NUMBER(value)  (((value) & QNAN) != QNAN)
+#define IS_BOOL(value)     (((value) | 1) == TRUE_VAL)
+#define IS_NIL(value)      ((value) == NIL_VAL)
+#define IS_NUMBER(value)   (((value) & QNAN) != QNAN)
 #define IS_OBJ(value) \
 		(((value) & (QNAN | SIGN_BIT)) == (QNAN | SIGN_BIT))
 
@@ -29,14 +29,14 @@ typedef uint64_t Value;
 #define AS_NUMBER(value)  valueToNum(value)
 #define AS_OBJ(value) \
 		((Obj*)(uintptr_t)((value) & ~(SIGN_BIT | QNAN)))
-
+		
 #define BOOL_VAL(b)     ((b) ? TRUE_VAL : FALSE_VAL)
 #define FALSE_VAL       ((Value)(uint64_t)(QNAN | TAG_FALSE))
 #define TRUE_VAL        ((Value)(uint64_t)(QNAN | TAG_TRUE))
 #define NIL_VAL         ((Value)(uint64_t)(QNAN | TAG_NIL))
 #define NUMBER_VAL(num) numToValue(num)
 #define OBJ_VAL(obj) \
-		(Value)(SIGN_BIT | QNAN | (uint64_t)(uintptr_t)(obj))
+		(Value)(SIGN_BIT | QNAN | (uint64_t) (uintptr_t)(obj))
 
 static inline double valueToNum(Value value) {
 	double num;
@@ -50,7 +50,7 @@ static inline Value numToValue(double num) {
 	return value;
 }
 
-#else 
+#else
 
 typedef enum {
 	VAL_BOOL,
@@ -62,25 +62,25 @@ typedef enum {
 typedef struct {
 	ValueType type;
 	union {
-		bool boolean;
+		bool boollean;
 		double number;
 		Obj* obj;
 	} as;
 } Value;
 
-#define IS_BOOL(value)    ((value).type == VAL_BOOL)
+#define IS_BOOL(value)     ((value).type == VAL_BOOL)
 #define IS_NIL(value)     ((value).type == VAL_NIL)
-#define IS_NUMBER(value)  ((value).type == VAL_NUMBER)
+#define IS_NUMBER(value)     ((value).type == VAL_NUMBER)
 #define IS_OBJ(value)     ((value).type == VAL_OBJ)
 
 #define AS_OBJ(value)     ((value).as.obj)
 #define AS_BOOL(value)    ((value).as.boolean)
 #define AS_NUMBER(value)  ((value).as.number)
 
-#define BOOL_VAL(value)   ((Value){VAL_BOOL, {.boolean = value}})
-#define NIL_VAL           ((Value){VAL_NIL, {.number = 0}})
+#define BOOL_VAL(value)  ((Value){VAL_BOOL, {.boolean = value}})
+#define NIL_VAL          ((Value){VAL_NIL, {.number = 0}})
 #define NUMBER_VAL(value) ((Value){VAL_NUMBER, {.number = value}})
-#define OBJ_VAL(object)   ((Value){VAL_OBJ, {.obj = (Obj*)object}})
+#define OBJ_VAL(object)  ((Value){VAL_OBJ, {.obj = (Obj*)object}})
 
 #endif
 

@@ -1,5 +1,5 @@
-#ifndef clox_memory_h
-#define clox_memory_h
+#ifndef kona_memory_h
+#define kona_memory_h
 
 #include "common.h"
 #include "value.h"

@@ -1,5 +1,5 @@
-#ifndef clox_compiler_h
-#define clox_compiler_h
+#ifndef kona_compiler_h
+#define kona_compiler_h
 
 #include "object.h"
 

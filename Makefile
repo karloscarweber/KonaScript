@@ -1,5 +1,3 @@
-.PHONY: kona
-
 # You may get a build error without `export MACOSX_DEPLOYMENT_TARGET=14.06`
 # if so, export that shit.
 #default:
@@ -8,11 +6,7 @@
 #	./clox/main
 
 default:
-	@ $(MAKE) -f util/c.make NAME=clox MODE=release SOURCE_DIR=c
-	@ cp build/clox clox 
-
-#	cd clox
-#	clang -o clox/main clox/main.c clox/chunk.c clox/memory.c clox/debug.c clox/value.c clox/vm.c clox/compiler.c clox/scanner.c clox/object.c clox/table.c
+	clang -o src/main src/main.c src/chunk.c src/memory.c src/debug.c src/value.c src/vm.c src/compiler.c src/scanner.c src/object.c src/table.c
 
 olddefault:
 	lua main.lua
@@ -48,3 +42,5 @@ kona:
 
 konaclean:
 	rm kona/kona;
+
+.PHONY: kona

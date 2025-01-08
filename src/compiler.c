@@ -282,6 +282,7 @@ static int resolveLocal(Compiler* compiler, Token* name) {
 
 	return -1;
 }
+
 static int addUpvalue(Compiler* compiler, uint8_t index,
 											bool isLocal) {
 	int upvalueCount = compiler->function->upvalueCount;
@@ -663,6 +664,7 @@ static void function(FunctionType type) {
 		emitByte(compiler.upvalues[i].index);
 	}
 }
+
 static void method() {
 	consume(TOKEN_IDENTIFIER, "Expect method name.");
 	uint8_t constant = identifierConstant(&parser.previous);

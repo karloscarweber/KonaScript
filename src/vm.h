@@ -2,12 +2,9 @@
 #ifndef kona_vm_h
 #define kona_vm_h
 
-
-// include these when we write them.
-// #include "object.h"
-// #include "table.h"
-// #include "value.h"
-
+#include "object.h"
+#include "table.h"
+#include "value.h"
 
 // We're going to set up some max frame sizes and stack maxes.
 // This means we can't nest too deeply right now. At least not yet.
@@ -15,7 +12,7 @@
 #define STACK_MAX (FRAMES_MAX * UINT8_COUNT)
 
 // CallFrame struct
-// An Object that contains a closure, an instruction pointer, and the number 
+// An Object that contains a closure, an instruction pointer, and the number
 // of Slots the CallFrame has. Slots are usually locals. In the case of a
 // function, that's passed arguments.
 // we're storing this in a Value so that we can use an object for these slots
@@ -68,7 +65,7 @@ extern VM vm;
 
 // initVM() -> Void
 // starts the virtual machine by allocating memory for it and setting default
-// values. 
+// values.
 void initVM();
 
 // freeVM -> void

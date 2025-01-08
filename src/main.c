@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-//#include "common.h"
-//#include "chunk.h"
-//#include "debug.h"
-#include "kona_vm.h"
+#include "common.h"
+#include "chunk.h"
+#include "debug.h"
+#include "vm.h"
 
 // Repl Function
 // reads each line in an endless loop and interprets the result
@@ -52,7 +52,7 @@ static char* readFile(const char* path) {
 	buffer[bytesRead] = '\0';
 	
 	fclose(file);
-	return buffer;	
+	return buffer;
 }
 
 // runFile
@@ -68,7 +68,7 @@ static void runFile(const char* path) {
 
 // main
 // entrypoint into the program or repl.
-// starts by initializing the VM, Then either starts the repl, or interprets a 
+// starts by initializing the VM, Then either starts the repl, or interprets a
 // file passed to the command.
 int main(int argc, const char* argv[]) {
 	initVM();

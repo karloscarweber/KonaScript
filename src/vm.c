@@ -1,3 +1,5 @@
+// kona_vm.c
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
@@ -43,6 +45,7 @@ static void runtimeError(const char* format, ...) {
 	resetStack();
 }
 
+// defines a native function in the vm.
 static void defineNative(const char* name, NativeFn function) {
 	push(OBJ_VAL(copyString(name, (int)strlen(name))));
 	push(OBJ_VAL(newNative(function)));
@@ -51,6 +54,7 @@ static void defineNative(const char* name, NativeFn function) {
 	pop();
 }
 
+// starts the VM
 void initVM() {
 	resetStack();
 	vm.objects = NULL;
@@ -70,6 +74,7 @@ void initVM() {
 	defineNative("clock", clockNative);
 }
 
+// frees the VM
 void freeVM() {
 	freeTable(&vm.globals);
 	freeTable(&vm.strings);
@@ -77,11 +82,13 @@ void freeVM() {
 	freeObjects();
 }
 
+// pushes a value onto the stack
 void push(Value value) {
 	*vm.stackTop = value;
 	vm.stackTop++;
 }
 
+// pops and returns
 Value pop() {
 	vm.stackTop--;
 	return *vm.stackTop;
@@ -489,7 +496,7 @@ static InterpretResult run() {
 					vm.frameCount--;
 					if (vm.frameCount == 0) {
 						pop();
-						return INTERPRET_OK;	
+						return INTERPRET_OK;
 					}
 					
 					vm.stackTop = frame->slots;

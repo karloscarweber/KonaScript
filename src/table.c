@@ -9,8 +9,8 @@
 #define TABLE_MAX_LOAD 0.75
 
 void initTable(Table* table) {
-	table->count = 0;	
-	table->capacity = 0;	
+	table->count = 0;
+	table->capacity = 0;
 	table->entries = NULL;
 }
 
@@ -56,7 +56,7 @@ static void adjustCapacity(Table* table, int capacity) {
 	Entry* entries = ALLOCATE(Entry, capacity);
 	for (int i = 0; i < capacity; i++) {
 		entries[i].key = NULL;
-		entries[i].value = NIL_VAL;		
+		entries[i].value = NIL_VAL;
 	}
 	
 	table->count = 0;
