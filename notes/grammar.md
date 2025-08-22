@@ -10,10 +10,10 @@ program            → declaration* EOF
 Each program is a series of successive declarations. Declarations are used to assign values to a variable.
 ```grammar
 declaration        → classDecl
-                   | funDecl 
+                   | funDecl
                    | statement
-classDecl          → "class" constant ( "<" constant )? block 
-funDecl            → "def" name parameterlist?  block 
+classDecl          → "class" constant ( "<" constant )? block
+funDecl            → "def" name parameterlist? block
 ```
 
 ### Statements
@@ -57,8 +57,8 @@ assignment         → ( ( call "." )? name)* "=" assignment
                    | ( ( call "." )? name)* ":" (ws | "," | newline )
                    | logic_or
 
-logic_or           → logic_and ( ( "||" | "or" ) logic_and )* 
-logic_and          → equality ( ("&&" | "and" ) equality )* 
+logic_or           → logic_and ( ( "||" | "or" ) logic_and )*
+logic_and          → equality ( ("&&" | "and" ) equality )*
 equality           → comparison ( ( "!=" | "==" | "not" ) )* ;
 comparision        → term ( ( ">"  | ">=" | "<" | "<=" ) term )* ;
 term               → factor ( ( "-"  | "+" ) factor )* ;
@@ -120,11 +120,11 @@ digit              → 0 .. 9
 **keywords** are reserved words used to build language constructs, these are reserved words and cannot be used as *Names* or *Identifiers*. **Keywords** are case sensitive, and in a case sensitive language won't be trigged by *Names* or *Identifiers* with the same characters but different case.
 ```
   and       break     case      catch     continue
-  class     def       do        else      end       
-  enum      false     for       fun       goto      
-  if        in        let       module    nil       
-  not       or        repeat    return    self      
-  super     switch    then      true      try       
+  class     def       do        else      end
+  enum      false     for       fun       goto
+  if        in        let       module    nil
+  not       or        repeat    return    self
+  super     switch    then      true      try
   until     unless    when      while
 ```
 
@@ -201,7 +201,7 @@ lit.count
 lit.toJson
 # > { "whatever": "It's a string", "loser": 5 }
 
-# A JSON string is automatically converted to an object literal. Except for 
+# A JSON string is automatically converted to an object literal. Except for
 # function definitions.
 
 # Enums are cool

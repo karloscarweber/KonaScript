@@ -6,12 +6,15 @@
 #	./clox/main
 
 default:
-	clang -o src/main src/main.c src/chunk.c src/memory.c src/debug.c src/value.c src/vm.c src/compiler.c src/scanner.c src/object.c src/table.c
+	clang -o build/kona src/main.c src/chunk.c src/memory.c src/debug.c src/value.c src/vm.c src/compiler.c src/scanner.c src/object.c src/table.c
+	
+test:
+	build/kona build/script.kna
 
 olddefault:
 	lua main.lua
 
-test:
+test_old:
 	luajit lox/test.lua
 
 generate:
@@ -25,7 +28,7 @@ printer:
 ##
 # Get Kona bootstrapped
 prebuild:
-	cd LuaJIT; make;
+	export MACOSX_DEPLOYMENT_TARGET=15.5; cd LuaJIT; make;
 
 concat:
 	cd kona; luajit concatenater.lua

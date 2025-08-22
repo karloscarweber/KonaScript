@@ -1,4 +1,4 @@
-// kona_vm.c
+// vm.c
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -7,7 +7,7 @@
 
 #include "common.h"
 #include "compiler.h"
-#include "debug.h"
+// #include "debug.h"
 #include "object.h"
 #include "memory.h"
 #include "vm.h"

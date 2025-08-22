@@ -1,4 +1,4 @@
-// kona_vm.h
+// vm.h
 #ifndef kona_vm_h
 #define kona_vm_h
 
